@@ -1,7 +1,10 @@
 #include <FastLED.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
 
-#define MAX_LEDS 159
-#define NUM_LEDS 10
+#define MAX_LEDS 160
+#define NUM_LEDS 160
+#define NUM_PONG_LEDS 10
 #define DATA_PIN 13
 #define CLOCK_PIN 14
 #define BTN_1_GPIO 23
@@ -122,7 +125,7 @@ void switchToPongMode(){
   }
   FastLED.show();
   delay(1000);
-  for (int i = 0; i< NUM_LEDS; i++){
+  for (int i = 0; i< NUM_PONG_LEDS; i++){
       leds[i] = CRGB::Blue;
   }
   FastLED.show();
@@ -144,7 +147,7 @@ void displayResult(int cur_delay){
     leds[i] = CRGB::Green;
   }
 
-  for (int i = (NUM_LEDS - 1); i > ((NUM_LEDS-1)-player_two_wins); i--){
+  for (int i = (NUM_PONG_LEDS - 1); i > ((NUM_PONG_LEDS-1)-player_two_wins); i--){
     leds[i] = CRGB::Green;
   }
   FastLED.show();
@@ -219,12 +222,12 @@ void loop() {
     if (player_successfull_two_press == 0){
       if(btn_two_state == 1){
         btn_two_state = 0;
-        if ((cur_pixel + PONG_TOLERANCE) <= (NUM_LEDS-1)){
+        if ((cur_pixel + PONG_TOLERANCE) <= (NUM_PONG_LEDS-1)){
           player_two_miss = 1;
         } else {
           player_successfull_two_press = 1;
         }
-      } else if ((reverseMode == 0) && (cur_pixel == (NUM_LEDS-1))){
+      } else if ((reverseMode == 0) && (cur_pixel == (NUM_PONG_LEDS-1))){
         player_two_miss = 1;
       }
     } else {
@@ -260,9 +263,9 @@ void loop() {
         }
       } else {
         cur_pixel += 1;
-        if (cur_pixel > (NUM_LEDS-1)){
+        if (cur_pixel > (NUM_PONG_LEDS-1)){
           player_successfull_two_press = 0;
-          cur_pixel = NUM_LEDS-2;
+          cur_pixel = NUM_PONG_LEDS-2;
           reverseMode = 1;
           cur_pong_delay = cur_pong_delay - PONG_DEC_PER_RUN;
           if (cur_pong_delay < PONG_MIN_LED_DELAY){
