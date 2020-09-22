@@ -10,6 +10,7 @@ Module.register('MMM-LEDStripControl', {
 
   defaults: {
     showPongOptions: true,
+    showColorOptions: true,
     showColorIndicators: true,
     outputOnIcon: "fa fa-lightbulb-o",
     outputOffIcon: "fa fa-lightbulb-o",
@@ -51,147 +52,151 @@ Module.register('MMM-LEDStripControl', {
         outputWrapper.appendChild(outputIcon)
       wrapper.appendChild(outputWrapper)
 
-      //color control during "normal" mode
-      const normalColorWrapper = document.createElement('div')
-        normalColorWrapper.className = "lsc-totalColorWrapper lsc-ncolor"
-        const nColorHeaderLine = document.createElement('div')
-          nColorHeaderLine.className = "lsc-color-header lsc-ncolor"
-          nColorHeaderLine.innerHTML = "Color"
-        normalColorWrapper.appendChild(nColorHeaderLine)
+      if (self.config.showColorOptions){
+        //color control during "normal" mode
+        const normalColorWrapper = document.createElement('div')
+          normalColorWrapper.className = "lsc-totalColorWrapper lsc-ncolor"
+          const nColorHeaderLine = document.createElement('div')
+            nColorHeaderLine.className = "lsc-color-header lsc-ncolor"
+            nColorHeaderLine.innerHTML = "Color"
+          normalColorWrapper.appendChild(nColorHeaderLine)
 
-        const normalColorIndicator = document.createElement('div')
-          normalColorIndicator.className = "lsc-colorIndicator lsc-ncolor"
-          normalColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["color_r"].value, self.curValues["color_g"].value, self.curValues["color_b"].value)
-        normalColorWrapper.appendChild(normalColorIndicator)
+          if (self.config.showColorIndicators){
+            const normalColorIndicator = document.createElement('div')
+              normalColorIndicator.className = "lsc-colorIndicator lsc-ncolor"
+              normalColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["color_r"].value, self.curValues["color_g"].value, self.curValues["color_b"].value)
+            normalColorWrapper.appendChild(normalColorIndicator)
+          }
 
-        const normalColorOuterWrapper = document.createElement('div')
-          normalColorOuterWrapper.className = "lsc-colorOuterWrapper lsc-ncolor"
-          //color red
-          const normalColorRedWrapper = document.createElement('div')
-            normalColorRedWrapper.className="lsc-colorInnerWrapper lsc-ncolor-red"
+          const normalColorOuterWrapper = document.createElement('div')
+            normalColorOuterWrapper.className = "lsc-colorOuterWrapper lsc-ncolor"
+            //color red
+            const normalColorRedWrapper = document.createElement('div')
+              normalColorRedWrapper.className="lsc-colorInnerWrapper lsc-ncolor-red"
 
-            const nColorRFastUp = document.createElement('i')
-              nColorRFastUp.className = self.config.upFastIcon+" lsc-icon lsc-ncolor-red lsc-fastUp"
-              nColorRFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_r","step":self.curValues["color_r"].step_u_f})})
-            normalColorRedWrapper.appendChild(nColorRFastUp)
+              const nColorRFastUp = document.createElement('i')
+                nColorRFastUp.className = self.config.upFastIcon+" lsc-icon lsc-ncolor-red lsc-fastUp"
+                nColorRFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_r","step":self.curValues["color_r"].step_u_f})})
+              normalColorRedWrapper.appendChild(nColorRFastUp)
 
-            const nColorRUp = document.createElement('i')
-              nColorRUp.className = self.config.upIcon+" lsc-icon lsc-ncolor-red lsc-up"
-              nColorRUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_r","step":self.curValues["color_r"].step_u})})
-            normalColorRedWrapper.appendChild(nColorRUp)
+              const nColorRUp = document.createElement('i')
+                nColorRUp.className = self.config.upIcon+" lsc-icon lsc-ncolor-red lsc-up"
+                nColorRUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_r","step":self.curValues["color_r"].step_u})})
+              normalColorRedWrapper.appendChild(nColorRUp)
 
-            const nColorRValue = document.createElement('div')
-              nColorRValue.className = "lsc-value lsc-ncolor-red"
+              const nColorRValue = document.createElement('div')
+                nColorRValue.className = "lsc-value lsc-ncolor-red"
 
-              if (self.curValues["color_r"].selected == true){
-                nColorRValue.className += " lsc-selected"
-              } else {
-                nColorRValue.className += " lsc-unselected"
-              }
+                if (self.curValues["color_r"].selected == true){
+                  nColorRValue.className += " lsc-selected"
+                } else {
+                  nColorRValue.className += " lsc-unselected"
+                }
 
-              self.curValues["color_r"].obj = nColorRValue
-              self.elements.push("color_r")
-              nColorRValue.innerHTML = self.curValues["color_r"].value
+                self.curValues["color_r"].obj = nColorRValue
+                self.elements.push("color_r")
+                nColorRValue.innerHTML = self.curValues["color_r"].value
 
-              
-            normalColorRedWrapper.appendChild(nColorRValue)
+                
+              normalColorRedWrapper.appendChild(nColorRValue)
 
-            const nColorRDown = document.createElement('i')
-              nColorRDown.className = self.config.downIcon+" lsc-icon lsc-ncolor-red lsc-down"
-              nColorRDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_r","step":self.curValues["color_r"].step_d})})
-            normalColorRedWrapper.appendChild(nColorRDown)
+              const nColorRDown = document.createElement('i')
+                nColorRDown.className = self.config.downIcon+" lsc-icon lsc-ncolor-red lsc-down"
+                nColorRDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_r","step":self.curValues["color_r"].step_d})})
+              normalColorRedWrapper.appendChild(nColorRDown)
 
-            const nColorRFastDown = document.createElement('i')
-              nColorRFastDown.className = self.config.downFastIcon+" lsc-icon ncolor-red lsc-fastDown"
-              nColorRFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_r","step":self.curValues["color_r"].step_d_f})})
-            normalColorRedWrapper.appendChild(nColorRFastDown)
+              const nColorRFastDown = document.createElement('i')
+                nColorRFastDown.className = self.config.downFastIcon+" lsc-icon ncolor-red lsc-fastDown"
+                nColorRFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_r","step":self.curValues["color_r"].step_d_f})})
+              normalColorRedWrapper.appendChild(nColorRFastDown)
 
-          normalColorOuterWrapper.appendChild(normalColorRedWrapper)
+            normalColorOuterWrapper.appendChild(normalColorRedWrapper)
 
-          //color green
-          const normalColorGreenWrapper = document.createElement('div')
-            normalColorGreenWrapper.className="lsc-colorInnerWrapper lsc-ncolor-green"
+            //color green
+            const normalColorGreenWrapper = document.createElement('div')
+              normalColorGreenWrapper.className="lsc-colorInnerWrapper lsc-ncolor-green"
 
-            const nColorGFastUp = document.createElement('i')
-              nColorGFastUp.className = self.config.upFastIcon+" lsc-icon lsc-ncolor-green lsc-fastUp"
-              nColorGFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_g","step":self.curValues["color_g"].step_u_f})})
-            normalColorGreenWrapper.appendChild(nColorGFastUp)
+              const nColorGFastUp = document.createElement('i')
+                nColorGFastUp.className = self.config.upFastIcon+" lsc-icon lsc-ncolor-green lsc-fastUp"
+                nColorGFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_g","step":self.curValues["color_g"].step_u_f})})
+              normalColorGreenWrapper.appendChild(nColorGFastUp)
 
-            const nColorGUp = document.createElement('i')
-              nColorGUp.className = self.config.upIcon+" lsc-icon lsc-ncolor-green lsc-up"
-              nColorGUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_g","step":self.curValues["color_g"].step_u})})
-            normalColorGreenWrapper.appendChild(nColorGUp)
+              const nColorGUp = document.createElement('i')
+                nColorGUp.className = self.config.upIcon+" lsc-icon lsc-ncolor-green lsc-up"
+                nColorGUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_g","step":self.curValues["color_g"].step_u})})
+              normalColorGreenWrapper.appendChild(nColorGUp)
 
-            const nColorGValue = document.createElement('div')
-              nColorGValue.className = "lsc-value lsc-ncolor-green"
+              const nColorGValue = document.createElement('div')
+                nColorGValue.className = "lsc-value lsc-ncolor-green"
 
-              if (self.curValues["color_g"].selected == true){
-                nColorGValue.className += " lsc-selected"
-              } else {
-                nColorGValue.className += " lsc-unselected"
-              }
+                if (self.curValues["color_g"].selected == true){
+                  nColorGValue.className += " lsc-selected"
+                } else {
+                  nColorGValue.className += " lsc-unselected"
+                }
 
-              self.curValues["color_g"].obj = nColorGValue
-              self.elements.push("color_g")
+                self.curValues["color_g"].obj = nColorGValue
+                self.elements.push("color_g")
 
-              nColorGValue.innerHTML = self.curValues["color_g"].value
-            normalColorGreenWrapper.appendChild(nColorGValue)
+                nColorGValue.innerHTML = self.curValues["color_g"].value
+              normalColorGreenWrapper.appendChild(nColorGValue)
 
-            const nColorGDown = document.createElement('i')
-              nColorGDown.className = self.config.downIcon+" lsc-icon lsc-ncolor-green lsc-down"
-              nColorGDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_g","step":self.curValues["color_g"].step_d})})
-            normalColorGreenWrapper.appendChild(nColorGDown)
+              const nColorGDown = document.createElement('i')
+                nColorGDown.className = self.config.downIcon+" lsc-icon lsc-ncolor-green lsc-down"
+                nColorGDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_g","step":self.curValues["color_g"].step_d})})
+              normalColorGreenWrapper.appendChild(nColorGDown)
 
-            const nColorGFastDown = document.createElement('i')
-              nColorGFastDown.className = self.config.downFastIcon+" lsc-icon ncolor-green lsc-fastDown"
-              nColorGFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_g","step":self.curValues["color_g"].step_d_f})})
-            normalColorGreenWrapper.appendChild(nColorGFastDown)
+              const nColorGFastDown = document.createElement('i')
+                nColorGFastDown.className = self.config.downFastIcon+" lsc-icon ncolor-green lsc-fastDown"
+                nColorGFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_g","step":self.curValues["color_g"].step_d_f})})
+              normalColorGreenWrapper.appendChild(nColorGFastDown)
 
-          normalColorOuterWrapper.appendChild(normalColorGreenWrapper)
+            normalColorOuterWrapper.appendChild(normalColorGreenWrapper)
 
-          //color blue
-          const normalColorBlueWrapper = document.createElement('div')
-            normalColorBlueWrapper.className="lsc-colorInnerWrapper lsc-ncolor-blue"
+            //color blue
+            const normalColorBlueWrapper = document.createElement('div')
+              normalColorBlueWrapper.className="lsc-colorInnerWrapper lsc-ncolor-blue"
 
-            const nColorBFastUp = document.createElement('i')
-              nColorBFastUp.className = self.config.upFastIcon+" lsc-icon lsc-ncolor-blue lsc-fastUp"
-              nColorBFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_b","step":self.curValues["color_b"].step_u_f})})
-            normalColorBlueWrapper.appendChild(nColorBFastUp)
+              const nColorBFastUp = document.createElement('i')
+                nColorBFastUp.className = self.config.upFastIcon+" lsc-icon lsc-ncolor-blue lsc-fastUp"
+                nColorBFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_b","step":self.curValues["color_b"].step_u_f})})
+              normalColorBlueWrapper.appendChild(nColorBFastUp)
 
-            const nColorBUp = document.createElement('i')
-              nColorBUp.className = self.config.upIcon+" lsc-icon lsc-ncolor-blue lsc-up"
-              nColorBUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_b","step":self.curValues["color_b"].step_u})})
-            normalColorBlueWrapper.appendChild(nColorBUp)
+              const nColorBUp = document.createElement('i')
+                nColorBUp.className = self.config.upIcon+" lsc-icon lsc-ncolor-blue lsc-up"
+                nColorBUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"color_b","step":self.curValues["color_b"].step_u})})
+              normalColorBlueWrapper.appendChild(nColorBUp)
 
-            const nColorBValue = document.createElement('div')
-              nColorBValue.className = "lsc-value lsc-ncolor-blue"
+              const nColorBValue = document.createElement('div')
+                nColorBValue.className = "lsc-value lsc-ncolor-blue"
 
-              if (self.curValues["color_b"].selected == true){
-                nColorBValue.className += " lsc-selected"
-              } else {
-                nColorBValue.className += " lsc-unselected"
-              }
+                if (self.curValues["color_b"].selected == true){
+                  nColorBValue.className += " lsc-selected"
+                } else {
+                  nColorBValue.className += " lsc-unselected"
+                }
 
-              self.curValues["color_b"].obj = nColorBValue
-              self.elements.push("color_b")
+                self.curValues["color_b"].obj = nColorBValue
+                self.elements.push("color_b")
 
-              nColorBValue.innerHTML = self.curValues["color_b"].value
-            normalColorBlueWrapper.appendChild(nColorBValue)
+                nColorBValue.innerHTML = self.curValues["color_b"].value
+              normalColorBlueWrapper.appendChild(nColorBValue)
 
-            const nColorBDown = document.createElement('i')
-              nColorBDown.className = self.config.downIcon+" lsc-icon lsc-ncolor-blue lsc-down"
-              nColorBDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_b","step":self.curValues["color_b"].step_u})})
-            normalColorBlueWrapper.appendChild(nColorBDown)
+              const nColorBDown = document.createElement('i')
+                nColorBDown.className = self.config.downIcon+" lsc-icon lsc-ncolor-blue lsc-down"
+                nColorBDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_b","step":self.curValues["color_b"].step_u})})
+              normalColorBlueWrapper.appendChild(nColorBDown)
 
-            const nColorBFastDown = document.createElement('i')
-              nColorBFastDown.className = self.config.downFastIcon+" lsc-icon ncolor-blue lsc-fastDown"
-              nColorBFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_b","step":self.curValues["color_b"].step_d_f})})
-            normalColorBlueWrapper.appendChild(nColorBFastDown)
+              const nColorBFastDown = document.createElement('i')
+                nColorBFastDown.className = self.config.downFastIcon+" lsc-icon ncolor-blue lsc-fastDown"
+                nColorBFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"color_b","step":self.curValues["color_b"].step_d_f})})
+              normalColorBlueWrapper.appendChild(nColorBFastDown)
 
-          normalColorOuterWrapper.appendChild(normalColorBlueWrapper)
+            normalColorOuterWrapper.appendChild(normalColorBlueWrapper)
 
-        normalColorWrapper.appendChild(normalColorOuterWrapper)
-      wrapper.appendChild(normalColorWrapper)
+          normalColorWrapper.appendChild(normalColorOuterWrapper)
+        wrapper.appendChild(normalColorWrapper)
+      }
 
 
       //pong options
@@ -204,10 +209,12 @@ Module.register('MMM-LEDStripControl', {
             pColorHeaderLine.innerHTML = "PONG Color"
           pongColorWrapper.appendChild(pColorHeaderLine)
 
-          const pongColorIndicator = document.createElement('div')
-            pongColorIndicator.className = "lsc-colorIndicator lsc-pcolor"
-            pongColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["pong_color_r"].value, self.curValues["pong_color_g"].value, self.curValues["pong_color_b"].value)
-          pongColorWrapper.appendChild(pongColorIndicator)
+          if (self.config.showColorIndicators){
+            const pongColorIndicator = document.createElement('div')
+              pongColorIndicator.className = "lsc-colorIndicator lsc-pcolor"
+              pongColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["pong_color_r"].value, self.curValues["pong_color_g"].value, self.curValues["pong_color_b"].value)
+            pongColorWrapper.appendChild(pongColorIndicator)
+          }
 
           const pongColorOuterWrapper = document.createElement('div')
             pongColorOuterWrapper.className = "lsc-colorOuterWrapper lsc-pcolor"
@@ -346,10 +353,12 @@ Module.register('MMM-LEDStripControl', {
             prColorHeaderLine.innerHTML = "PONG Result Color"
           pongResultColorWrapper.appendChild(prColorHeaderLine)
 
-          const pongResultColorIndicator = document.createElement('div')
-            pongResultColorIndicator.className = "lsc-colorIndicator lsc-prcolor"
-            pongResultColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["pong_result_color_r"].value, self.curValues["pong_result_color_g"].value, self.curValues["pong_result_color_b"].value)
-          pongResultColorWrapper.appendChild(pongResultColorIndicator)
+          if (self.config.showColorIndicators){
+            const pongResultColorIndicator = document.createElement('div')
+              pongResultColorIndicator.className = "lsc-colorIndicator lsc-prcolor"
+              pongResultColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["pong_result_color_r"].value, self.curValues["pong_result_color_g"].value, self.curValues["pong_result_color_b"].value)
+            pongResultColorWrapper.appendChild(pongResultColorIndicator)
+          }
 
           const pongResultColorOuterWrapper = document.createElement('div')
             pongResultColorOuterWrapper.className = "lsc-colorOuterWrapper lsc-prcolor"
@@ -502,15 +511,6 @@ Module.register('MMM-LEDStripControl', {
       //     "pong_result_delay_after",
       //     "pong_result_delay_during"
       // )
-    
-    setTimeout(()=>{
-      self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS")
-  
-      setTimeout(()=>{
-        self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS")
-      }, self.config.fetchStatusInterval * 1000)  
-    }, self.config.fetchStatusInterval * 1000)
-
 
     self.curValues = {
       "output" : {"value":false, "selected": true, "obj" : null},
@@ -536,6 +536,18 @@ Module.register('MMM-LEDStripControl', {
 
     Log.info("Starting module: " + self.name);
     self.sendSocketNotification('CONFIG', self.config)
+
+    setTimeout(()=>{
+      self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
+  
+      setTimeout(()=>{
+        self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
+      }, self.config.fetchStatusInterval * 1000)  
+    }, self.config.fetchStatusInterval * 1000)
+
+    setTimeout(()=>{
+      self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
+    }, 1000)
   },
 
   notificationReceived: function (notification, payload) {
