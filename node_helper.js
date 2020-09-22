@@ -1,5 +1,5 @@
 /* Magic Mirror
- * Module: LedStripControl
+ * Module: LEDStripControl
  *
  * By Tom Hirschberger
  * MIT Licensed.
