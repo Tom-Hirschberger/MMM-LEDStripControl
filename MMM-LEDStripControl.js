@@ -17,7 +17,7 @@ Module.register('MMM-LEDStripControl', {
     upFastIcon: "fa fa-angle-double-up",
     downIcon: "fa fa-angle-down",
     downFastIcon: "fa fa-angle-double-down",
-    fetchStatusInterval: 30000
+    fetchStatusInterval: 30
   },
 
   getStyles: function() {
@@ -338,7 +338,6 @@ Module.register('MMM-LEDStripControl', {
         wrapper.appendChild(pongColorWrapper)
 
 
-
         //color control of the pong result colors
         const pongResultColorWrapper = document.createElement('div')
           pongResultColorWrapper.className = "lsc-totalColorWrapper lsc-prcolor"
@@ -504,9 +503,13 @@ Module.register('MMM-LEDStripControl', {
       //     "pong_result_delay_during"
       // )
     
-    // setTimeout(()=>{
-    //   self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS")
-    // }, self.config.fetchStatusInterval)
+    setTimeout(()=>{
+      self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS")
+  
+      setTimeout(()=>{
+        self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS")
+      }, self.config.fetchStatusInterval * 1000)  
+    }, self.config.fetchStatusInterval * 1000)
 
 
     self.curValues = {
@@ -656,6 +659,8 @@ Module.register('MMM-LEDStripControl', {
           self.sendConfigurationNotification()
         }
       }
+    } else if (notification === "LED_STRIP_CONTROL_STATUS_UPDATE"){
+      self.updateValuesToNotificationPayload(payload)
     }
   },
 
@@ -681,9 +686,25 @@ Module.register('MMM-LEDStripControl', {
     self.sendNotification("LED_STRIP_CONTROL_CURRENT_CONFIG", JSON.stringify(curConfigArray))
   },
 
-  // updateValuesToNotificationPayload: function(newValues){
-  //   newValueObj = JSON.parse(payload)
-  // },
+  updateValuesToNotificationPayload: function(newValues){
+    const self = this
+    newValuesObj = JSON.parse(newValues)
+    for (let key in newValuesObj){
+      if(key !== "pong"){
+        if (typeof self.curValues[key] !== "undefined"){
+          self.curValues[key].value = newValuesObj[key]
+        }
+      } else {
+        for(let subKey in newValuesObj["pong"]){
+          if (typeof self.curValues["pong_"+subKey] !== "undefined"){
+            self.curValues["pong_"+subKey].value = newValuesObj["pong"][subKey]
+          }
+        }
+      }
+    }
+
+    self.updateDom()
+  },
 
   rgbToHex: function (rgb) { 
     var hex = Number(rgb).toString(16);
