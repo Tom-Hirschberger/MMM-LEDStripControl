@@ -1,23 +1,22 @@
 {
-  "name": "MMM-Temperature",
+  "name": "MMM-LEDStripControl",
   "version": "0.0.1",
   "description": "",
-  "main": "MMM-Temperature",
+  "main": "MMM-LEDStripControl",
   "dependencies": {
-    "child_process": "latest"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 0"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Tom-Hirschberger/MMM-Temperature.git"
+    "url": "git@github.com:Tom-Hirschberger/MMM-LEDStripControl.git"
   },
   "author": "Thomas Hirschberger",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Tom-Hirschberger/MMM-Temperature/issues"
+    "url": "https://github.com/Tom-Hirschberger/MMM-LEDStripControl/issues"
   },
-  "homepage": "https://github.com/Tom-Hirschberger/MMM-Temperature/#readme"
+  "homepage": "https://github.com/Tom-Hirschberger/MMM-LEDStripControl/#readme"
 }
