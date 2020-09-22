@@ -10,7 +10,8 @@ Module.register('MMM-LEDStripControl', {
 
   defaults: {
     showPongOptions: true,
-    showColorOptions: true,
+    showNormalColorOptions: true,
+    showPongColorOptions: true,
     showColorIndicators: true,
     outputOnIcon: "fa fa-lightbulb-o",
     outputOffIcon: "fa fa-lightbulb-o",
@@ -52,7 +53,7 @@ Module.register('MMM-LEDStripControl', {
         outputWrapper.appendChild(outputIcon)
       wrapper.appendChild(outputWrapper)
 
-      if (self.config.showColorOptions){
+      if (self.config.showNormalColorOptions){
         //color control during "normal" mode
         const normalColorWrapper = document.createElement('div')
           normalColorWrapper.className = "lsc-totalColorWrapper lsc-ncolor"
@@ -201,293 +202,294 @@ Module.register('MMM-LEDStripControl', {
 
       //pong options
       if (self.config.showPongOptions == true){
-        //color control of the pong colors
-        const pongColorWrapper = document.createElement('div')
-          pongColorWrapper.className = "lsc-totalColorWrapper lsc-pcolor"
-          const pColorHeaderLine = document.createElement('div')
-            pColorHeaderLine.className = "lsc-color-header lsc-pcolor"
-            pColorHeaderLine.innerHTML = "PONG Color"
-          pongColorWrapper.appendChild(pColorHeaderLine)
+        if (self.config.showPongColorOptions){
+          //color control of the pong colors
+          const pongColorWrapper = document.createElement('div')
+            pongColorWrapper.className = "lsc-totalColorWrapper lsc-pcolor"
+            const pColorHeaderLine = document.createElement('div')
+              pColorHeaderLine.className = "lsc-color-header lsc-pcolor"
+              pColorHeaderLine.innerHTML = "PONG Color"
+            pongColorWrapper.appendChild(pColorHeaderLine)
 
-          if (self.config.showColorIndicators){
-            const pongColorIndicator = document.createElement('div')
-              pongColorIndicator.className = "lsc-colorIndicator lsc-pcolor"
-              pongColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["pong_color_r"].value, self.curValues["pong_color_g"].value, self.curValues["pong_color_b"].value)
-            pongColorWrapper.appendChild(pongColorIndicator)
-          }
+            if (self.config.showColorIndicators){
+              const pongColorIndicator = document.createElement('div')
+                pongColorIndicator.className = "lsc-colorIndicator lsc-pcolor"
+                pongColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["pong_color_r"].value, self.curValues["pong_color_g"].value, self.curValues["pong_color_b"].value)
+              pongColorWrapper.appendChild(pongColorIndicator)
+            }
 
-          const pongColorOuterWrapper = document.createElement('div')
-            pongColorOuterWrapper.className = "lsc-colorOuterWrapper lsc-pcolor"
-            //color red
-            const pongColorRedWrapper = document.createElement('div')
-              pongColorRedWrapper.className="lsc-colorInnerWrapper lsc-pcolor-red"
+            const pongColorOuterWrapper = document.createElement('div')
+              pongColorOuterWrapper.className = "lsc-colorOuterWrapper lsc-pcolor"
+              //color red
+              const pongColorRedWrapper = document.createElement('div')
+                pongColorRedWrapper.className="lsc-colorInnerWrapper lsc-pcolor-red"
 
-              const pColorRFastUp = document.createElement('i')
-                pColorRFastUp.className = self.config.upFastIcon+" lsc-icon lsc-pcolor-red lsc-fastUp"
-                pColorRFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_r","step":self.curValues["pong_color_r"].step_u_f})})
-              pongColorRedWrapper.appendChild(pColorRFastUp)
+                const pColorRFastUp = document.createElement('i')
+                  pColorRFastUp.className = self.config.upFastIcon+" lsc-icon lsc-pcolor-red lsc-fastUp"
+                  pColorRFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_r","step":self.curValues["pong_color_r"].step_u_f})})
+                pongColorRedWrapper.appendChild(pColorRFastUp)
 
-              const pColorRUp = document.createElement('i')
-                pColorRUp.className = self.config.upIcon+" lsc-icon lsc-pcolor-red lsc-up"
-                pColorRUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_r","step":self.curValues["pong_color_r"].step_u})})
-              pongColorRedWrapper.appendChild(pColorRUp)
+                const pColorRUp = document.createElement('i')
+                  pColorRUp.className = self.config.upIcon+" lsc-icon lsc-pcolor-red lsc-up"
+                  pColorRUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_r","step":self.curValues["pong_color_r"].step_u})})
+                pongColorRedWrapper.appendChild(pColorRUp)
 
-              const pColorRValue = document.createElement('div')
-                pColorRValue.className = "lsc-value lsc-pcolor-red"
+                const pColorRValue = document.createElement('div')
+                  pColorRValue.className = "lsc-value lsc-pcolor-red"
 
-                if (self.curValues["pong_color_r"].selected == true){
-                  pColorRValue.className += " lsc-selected"
-                } else {
-                  pColorRValue.className += " lsc-unselected"
-                }
-  
-                self.curValues["pong_color_r"].obj = pColorRValue
-                self.elements.push("pong_color_r")
+                  if (self.curValues["pong_color_r"].selected == true){
+                    pColorRValue.className += " lsc-selected"
+                  } else {
+                    pColorRValue.className += " lsc-unselected"
+                  }
+    
+                  self.curValues["pong_color_r"].obj = pColorRValue
+                  self.elements.push("pong_color_r")
 
-                pColorRValue.innerHTML = self.curValues["pong_color_r"].value
-              pongColorRedWrapper.appendChild(pColorRValue)
+                  pColorRValue.innerHTML = self.curValues["pong_color_r"].value
+                pongColorRedWrapper.appendChild(pColorRValue)
 
-              const pColorRDown = document.createElement('i')
-                pColorRDown.className = self.config.downIcon+" lsc-icon lsc-pcolor-red lsc-down"
-                pColorRDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_r","step":self.curValues["pong_color_r"].step_d})})
-              pongColorRedWrapper.appendChild(pColorRDown)
+                const pColorRDown = document.createElement('i')
+                  pColorRDown.className = self.config.downIcon+" lsc-icon lsc-pcolor-red lsc-down"
+                  pColorRDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_r","step":self.curValues["pong_color_r"].step_d})})
+                pongColorRedWrapper.appendChild(pColorRDown)
 
-              const pColorRFastDown = document.createElement('i')
-                pColorRFastDown.className = self.config.downFastIcon+" lsc-icon pcolor-red lsc-fastDown"
-                pColorRFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_r","step":self.curValues["pong_color_r"].step_d_f})})
-              pongColorRedWrapper.appendChild(pColorRFastDown)
+                const pColorRFastDown = document.createElement('i')
+                  pColorRFastDown.className = self.config.downFastIcon+" lsc-icon pcolor-red lsc-fastDown"
+                  pColorRFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_r","step":self.curValues["pong_color_r"].step_d_f})})
+                pongColorRedWrapper.appendChild(pColorRFastDown)
 
-            pongColorOuterWrapper.appendChild(pongColorRedWrapper)
+              pongColorOuterWrapper.appendChild(pongColorRedWrapper)
 
-            //color green
-            const pongColorGreenWrapper = document.createElement('div')
-              pongColorGreenWrapper.className="lsc-colorInnerWrapper lsc-pcolor-green"
+              //color green
+              const pongColorGreenWrapper = document.createElement('div')
+                pongColorGreenWrapper.className="lsc-colorInnerWrapper lsc-pcolor-green"
 
-              const pColorGFastUp = document.createElement('i')
-                pColorGFastUp.className = self.config.upFastIcon+" lsc-icon lsc-pcolor-green lsc-fastUp"
-                pColorGFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_g","step":self.curValues["pong_color_g"].step_u_f})})
-              pongColorGreenWrapper.appendChild(pColorGFastUp)
+                const pColorGFastUp = document.createElement('i')
+                  pColorGFastUp.className = self.config.upFastIcon+" lsc-icon lsc-pcolor-green lsc-fastUp"
+                  pColorGFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_g","step":self.curValues["pong_color_g"].step_u_f})})
+                pongColorGreenWrapper.appendChild(pColorGFastUp)
 
-              const pColorGUp = document.createElement('i')
-                pColorGUp.className = self.config.upIcon+" lsc-icon lsc-pcolor-green lsc-up"
-                pColorGUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_g","step":self.curValues["pong_color_g"].step_u})})
-              pongColorGreenWrapper.appendChild(pColorGUp)
+                const pColorGUp = document.createElement('i')
+                  pColorGUp.className = self.config.upIcon+" lsc-icon lsc-pcolor-green lsc-up"
+                  pColorGUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_g","step":self.curValues["pong_color_g"].step_u})})
+                pongColorGreenWrapper.appendChild(pColorGUp)
 
-              const pColorGValue = document.createElement('div')
-                pColorGValue.className = "lsc-value lsc-pcolor-green"
+                const pColorGValue = document.createElement('div')
+                  pColorGValue.className = "lsc-value lsc-pcolor-green"
 
-                if (self.curValues["pong_color_g"].selected == true){
-                  pColorGValue.className += " lsc-selected"
-                } else {
-                  pColorGValue.className += " lsc-unselected"
-                }
-  
-                self.curValues["pong_color_g"].obj = pColorGValue
-                self.elements.push("pong_color_g")
+                  if (self.curValues["pong_color_g"].selected == true){
+                    pColorGValue.className += " lsc-selected"
+                  } else {
+                    pColorGValue.className += " lsc-unselected"
+                  }
+    
+                  self.curValues["pong_color_g"].obj = pColorGValue
+                  self.elements.push("pong_color_g")
 
-                pColorGValue.innerHTML = self.curValues["pong_color_g"].value
-              pongColorGreenWrapper.appendChild(pColorGValue)
+                  pColorGValue.innerHTML = self.curValues["pong_color_g"].value
+                pongColorGreenWrapper.appendChild(pColorGValue)
 
-              const pColorGDown = document.createElement('i')
-                pColorGDown.className = self.config.downIcon+" lsc-icon lsc-pcolor-green lsc-down"
-                pColorGDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_g","step":self.curValues["pong_color_g"].step_d})})
-              pongColorGreenWrapper.appendChild(pColorGDown)
+                const pColorGDown = document.createElement('i')
+                  pColorGDown.className = self.config.downIcon+" lsc-icon lsc-pcolor-green lsc-down"
+                  pColorGDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_g","step":self.curValues["pong_color_g"].step_d})})
+                pongColorGreenWrapper.appendChild(pColorGDown)
 
-              const pColorGFastDown = document.createElement('i')
-                pColorGFastDown.className = self.config.downFastIcon+" lsc-icon pcolor-green lsc-fastDown"
-                pColorGFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_g","step":self.curValues["pong_color_g"].step_d_f})})
-              pongColorGreenWrapper.appendChild(pColorGFastDown)
+                const pColorGFastDown = document.createElement('i')
+                  pColorGFastDown.className = self.config.downFastIcon+" lsc-icon pcolor-green lsc-fastDown"
+                  pColorGFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_g","step":self.curValues["pong_color_g"].step_d_f})})
+                pongColorGreenWrapper.appendChild(pColorGFastDown)
 
-            pongColorOuterWrapper.appendChild(pongColorGreenWrapper)
+              pongColorOuterWrapper.appendChild(pongColorGreenWrapper)
 
-            //color blue
-            const pongColorBlueWrapper = document.createElement('div')
-              pongColorBlueWrapper.className="lsc-colorInnerWrapper lsc-pcolor-blue"
+              //color blue
+              const pongColorBlueWrapper = document.createElement('div')
+                pongColorBlueWrapper.className="lsc-colorInnerWrapper lsc-pcolor-blue"
 
-              const pColorBFastUp = document.createElement('i')
-                pColorBFastUp.className = self.config.upFastIcon+" lsc-icon lsc-pcolor-blue lsc-fastUp"
-                pColorBFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_b","step":self.curValues["pong_color_b"].step_u_f})})
-              pongColorBlueWrapper.appendChild(pColorBFastUp)
+                const pColorBFastUp = document.createElement('i')
+                  pColorBFastUp.className = self.config.upFastIcon+" lsc-icon lsc-pcolor-blue lsc-fastUp"
+                  pColorBFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_b","step":self.curValues["pong_color_b"].step_u_f})})
+                pongColorBlueWrapper.appendChild(pColorBFastUp)
 
-              const pColorBUp = document.createElement('i')
-                pColorBUp.className = self.config.upIcon+" lsc-icon lsc-pcolor-blue lsc-up"
-                pColorBUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_b","step":self.curValues["pong_color_b"].step_u})})
-              pongColorBlueWrapper.appendChild(pColorBUp)
+                const pColorBUp = document.createElement('i')
+                  pColorBUp.className = self.config.upIcon+" lsc-icon lsc-pcolor-blue lsc-up"
+                  pColorBUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_color_b","step":self.curValues["pong_color_b"].step_u})})
+                pongColorBlueWrapper.appendChild(pColorBUp)
 
-              const pColorBValue = document.createElement('div')
-                pColorBValue.className = "lsc-value lsc-pcolor-blue"
+                const pColorBValue = document.createElement('div')
+                  pColorBValue.className = "lsc-value lsc-pcolor-blue"
 
-                if (self.curValues["pong_color_b"].selected == true){
-                  pColorBValue.className += " lsc-selected"
-                } else {
-                  pColorBValue.className += " lsc-unselected"
-                }
-  
-                self.curValues["pong_color_b"].obj = pColorBValue
-                self.elements.push("pong_color_b")
+                  if (self.curValues["pong_color_b"].selected == true){
+                    pColorBValue.className += " lsc-selected"
+                  } else {
+                    pColorBValue.className += " lsc-unselected"
+                  }
+    
+                  self.curValues["pong_color_b"].obj = pColorBValue
+                  self.elements.push("pong_color_b")
 
-                pColorBValue.innerHTML = self.curValues["pong_color_b"].value
-              pongColorBlueWrapper.appendChild(pColorBValue)
+                  pColorBValue.innerHTML = self.curValues["pong_color_b"].value
+                pongColorBlueWrapper.appendChild(pColorBValue)
 
-              const pColorBDown = document.createElement('i')
-                pColorBDown.className = self.config.downIcon+" lsc-icon lsc-pcolor-blue lsc-down"
-                pColorBDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_b","step":self.curValues["pong_color_b"].step_d})})
-              pongColorBlueWrapper.appendChild(pColorBDown)
+                const pColorBDown = document.createElement('i')
+                  pColorBDown.className = self.config.downIcon+" lsc-icon lsc-pcolor-blue lsc-down"
+                  pColorBDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_b","step":self.curValues["pong_color_b"].step_d})})
+                pongColorBlueWrapper.appendChild(pColorBDown)
 
-              const pColorBFastDown = document.createElement('i')
-                pColorBFastDown.className = self.config.downFastIcon+" lsc-icon pcolor-blue lsc-fastDown"
-                pColorBFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_b","step":self.curValues["pong_color_b"].step_d_f})})
-              pongColorBlueWrapper.appendChild(pColorBFastDown)
+                const pColorBFastDown = document.createElement('i')
+                  pColorBFastDown.className = self.config.downFastIcon+" lsc-icon pcolor-blue lsc-fastDown"
+                  pColorBFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_color_b","step":self.curValues["pong_color_b"].step_d_f})})
+                pongColorBlueWrapper.appendChild(pColorBFastDown)
 
-            pongColorOuterWrapper.appendChild(pongColorBlueWrapper)
+              pongColorOuterWrapper.appendChild(pongColorBlueWrapper)
 
-          pongColorWrapper.appendChild(pongColorOuterWrapper)
-        wrapper.appendChild(pongColorWrapper)
+            pongColorWrapper.appendChild(pongColorOuterWrapper)
+          wrapper.appendChild(pongColorWrapper)
 
 
-        //color control of the pong result colors
-        const pongResultColorWrapper = document.createElement('div')
-          pongResultColorWrapper.className = "lsc-totalColorWrapper lsc-prcolor"
-          const prColorHeaderLine = document.createElement('div')
-            prColorHeaderLine.className = "lsc-color-header lsc-prcolor"
-            prColorHeaderLine.innerHTML = "PONG Result Color"
-          pongResultColorWrapper.appendChild(prColorHeaderLine)
+          //color control of the pong result colors
+          const pongResultColorWrapper = document.createElement('div')
+            pongResultColorWrapper.className = "lsc-totalColorWrapper lsc-prcolor"
+            const prColorHeaderLine = document.createElement('div')
+              prColorHeaderLine.className = "lsc-color-header lsc-prcolor"
+              prColorHeaderLine.innerHTML = "PONG Result Color"
+            pongResultColorWrapper.appendChild(prColorHeaderLine)
 
-          if (self.config.showColorIndicators){
-            const pongResultColorIndicator = document.createElement('div')
-              pongResultColorIndicator.className = "lsc-colorIndicator lsc-prcolor"
-              pongResultColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["pong_result_color_r"].value, self.curValues["pong_result_color_g"].value, self.curValues["pong_result_color_b"].value)
-            pongResultColorWrapper.appendChild(pongResultColorIndicator)
-          }
+            if (self.config.showColorIndicators){
+              const pongResultColorIndicator = document.createElement('div')
+                pongResultColorIndicator.className = "lsc-colorIndicator lsc-prcolor"
+                pongResultColorIndicator.style.background = "#"+self.fullColorHex(self.curValues["pong_result_color_r"].value, self.curValues["pong_result_color_g"].value, self.curValues["pong_result_color_b"].value)
+              pongResultColorWrapper.appendChild(pongResultColorIndicator)
+            }
 
-          const pongResultColorOuterWrapper = document.createElement('div')
-            pongResultColorOuterWrapper.className = "lsc-colorOuterWrapper lsc-prcolor"
-            //color red
-            const pongResultColorRedWrapper = document.createElement('div')
-              pongResultColorRedWrapper.className="lsc-colorInnerWrapper lsc-prcolor-red"
+            const pongResultColorOuterWrapper = document.createElement('div')
+              pongResultColorOuterWrapper.className = "lsc-colorOuterWrapper lsc-prcolor"
+              //color red
+              const pongResultColorRedWrapper = document.createElement('div')
+                pongResultColorRedWrapper.className="lsc-colorInnerWrapper lsc-prcolor-red"
 
-              const prColorRFastUp = document.createElement('i')
-                prColorRFastUp.className = self.config.upFastIcon+" lsc-icon lsc-prcolor-red lsc-fastUp"
-                prColorRFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_r","step":self.curValues["pong_result_color_r"].step_u_f})})
-              pongResultColorRedWrapper.appendChild(prColorRFastUp)
+                const prColorRFastUp = document.createElement('i')
+                  prColorRFastUp.className = self.config.upFastIcon+" lsc-icon lsc-prcolor-red lsc-fastUp"
+                  prColorRFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_r","step":self.curValues["pong_result_color_r"].step_u_f})})
+                pongResultColorRedWrapper.appendChild(prColorRFastUp)
 
-              const prColorRUp = document.createElement('i')
-                prColorRUp.className = self.config.upIcon+" lsc-icon lsc-prcolor-red lsc-up"
-                prColorRUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_r","step":self.curValues["pong_result_color_r"].step_u})})
-              pongResultColorRedWrapper.appendChild(prColorRUp)
+                const prColorRUp = document.createElement('i')
+                  prColorRUp.className = self.config.upIcon+" lsc-icon lsc-prcolor-red lsc-up"
+                  prColorRUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_r","step":self.curValues["pong_result_color_r"].step_u})})
+                pongResultColorRedWrapper.appendChild(prColorRUp)
 
-              const prColorRValue = document.createElement('div')
-                prColorRValue.className = "lsc-value lsc-prcolor-red"
+                const prColorRValue = document.createElement('div')
+                  prColorRValue.className = "lsc-value lsc-prcolor-red"
 
-                if (self.curValues["pong_result_color_r"].selected == true){
-                  prColorRValue.className += " lsc-selected"
-                } else {
-                  prColorRValue.className += " lsc-unselected"
-                }
-  
-                self.curValues["pong_result_color_r"].obj = prColorRValue
-                self.elements.push("pong_result_color_r")
+                  if (self.curValues["pong_result_color_r"].selected == true){
+                    prColorRValue.className += " lsc-selected"
+                  } else {
+                    prColorRValue.className += " lsc-unselected"
+                  }
+    
+                  self.curValues["pong_result_color_r"].obj = prColorRValue
+                  self.elements.push("pong_result_color_r")
 
-                prColorRValue.innerHTML = self.curValues["pong_result_color_r"].value
-              pongResultColorRedWrapper.appendChild(prColorRValue)
+                  prColorRValue.innerHTML = self.curValues["pong_result_color_r"].value
+                pongResultColorRedWrapper.appendChild(prColorRValue)
 
-              const prColorRDown = document.createElement('i')
-                prColorRDown.className = self.config.downIcon+" lsc-icon lsc-prcolor-red lsc-down"
-                prColorRDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_r","step":self.curValues["pong_result_color_r"].step_d})})
-              pongResultColorRedWrapper.appendChild(prColorRDown)
+                const prColorRDown = document.createElement('i')
+                  prColorRDown.className = self.config.downIcon+" lsc-icon lsc-prcolor-red lsc-down"
+                  prColorRDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_r","step":self.curValues["pong_result_color_r"].step_d})})
+                pongResultColorRedWrapper.appendChild(prColorRDown)
 
-              const prColorRFastDown = document.createElement('i')
-                prColorRFastDown.className = self.config.downFastIcon+" lsc-icon prcolor-red lsc-fastDown"
-                prColorRFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_r","step":self.curValues["pong_result_color_r"].step_d_f})})
-              pongResultColorRedWrapper.appendChild(prColorRFastDown)
+                const prColorRFastDown = document.createElement('i')
+                  prColorRFastDown.className = self.config.downFastIcon+" lsc-icon prcolor-red lsc-fastDown"
+                  prColorRFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_r","step":self.curValues["pong_result_color_r"].step_d_f})})
+                pongResultColorRedWrapper.appendChild(prColorRFastDown)
 
-            pongResultColorOuterWrapper.appendChild(pongResultColorRedWrapper)
+              pongResultColorOuterWrapper.appendChild(pongResultColorRedWrapper)
 
-            //color green
-            const pongResultColorGreenWrapper = document.createElement('div')
-              pongResultColorGreenWrapper.className="lsc-colorInnerWrapper lsc-prcolor-green"
+              //color green
+              const pongResultColorGreenWrapper = document.createElement('div')
+                pongResultColorGreenWrapper.className="lsc-colorInnerWrapper lsc-prcolor-green"
 
-              const prColorGFastUp = document.createElement('i')
-                prColorGFastUp.className = self.config.upFastIcon+" lsc-icon lsc-prcolor-green lsc-fastUp"
-                prColorGFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_g","step":self.curValues["pong_result_color_g"].step_u_f})})
-              pongResultColorGreenWrapper.appendChild(prColorGFastUp)
+                const prColorGFastUp = document.createElement('i')
+                  prColorGFastUp.className = self.config.upFastIcon+" lsc-icon lsc-prcolor-green lsc-fastUp"
+                  prColorGFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_g","step":self.curValues["pong_result_color_g"].step_u_f})})
+                pongResultColorGreenWrapper.appendChild(prColorGFastUp)
 
-              const prColorGUp = document.createElement('i')
-                prColorGUp.className = self.config.upIcon+" lsc-icon lsc-prcolor-green lsc-up"
-                prColorGUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_g","step":self.curValues["pong_result_color_g"].step_u})})
-              pongResultColorGreenWrapper.appendChild(prColorGUp)
+                const prColorGUp = document.createElement('i')
+                  prColorGUp.className = self.config.upIcon+" lsc-icon lsc-prcolor-green lsc-up"
+                  prColorGUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_g","step":self.curValues["pong_result_color_g"].step_u})})
+                pongResultColorGreenWrapper.appendChild(prColorGUp)
 
-              const prColorGValue = document.createElement('div')
-                prColorGValue.className = "lsc-value lsc-prcolor-green"
+                const prColorGValue = document.createElement('div')
+                  prColorGValue.className = "lsc-value lsc-prcolor-green"
 
-                if (self.curValues["pong_result_color_g"].selected == true){
-                  prColorGValue.className += " lsc-selected"
-                } else {
-                  prColorGValue.className += " lsc-unselected"
-                }
-  
-                self.curValues["pong_result_color_g"].obj = prColorGValue
-                self.elements.push("pong_result_color_g")
+                  if (self.curValues["pong_result_color_g"].selected == true){
+                    prColorGValue.className += " lsc-selected"
+                  } else {
+                    prColorGValue.className += " lsc-unselected"
+                  }
+    
+                  self.curValues["pong_result_color_g"].obj = prColorGValue
+                  self.elements.push("pong_result_color_g")
 
-                prColorGValue.innerHTML = self.curValues["pong_result_color_g"].value
-              pongResultColorGreenWrapper.appendChild(prColorGValue)
+                  prColorGValue.innerHTML = self.curValues["pong_result_color_g"].value
+                pongResultColorGreenWrapper.appendChild(prColorGValue)
 
-              const prColorGDown = document.createElement('i')
-                prColorGDown.className = self.config.downIcon+" lsc-icon lsc-prcolor-green lsc-down"
-                prColorGDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_g","step":self.curValues["pong_result_color_g"].step_d})})
-              pongResultColorGreenWrapper.appendChild(prColorGDown)
+                const prColorGDown = document.createElement('i')
+                  prColorGDown.className = self.config.downIcon+" lsc-icon lsc-prcolor-green lsc-down"
+                  prColorGDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_g","step":self.curValues["pong_result_color_g"].step_d})})
+                pongResultColorGreenWrapper.appendChild(prColorGDown)
 
-              const prColorGFastDown = document.createElement('i')
-                prColorGFastDown.className = self.config.downFastIcon+" lsc-icon prcolor-green lsc-fastDown"
-                prColorGFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_g","step":self.curValues["pong_result_color_g"].step_d_f})})
-              pongResultColorGreenWrapper.appendChild(prColorGFastDown)
+                const prColorGFastDown = document.createElement('i')
+                  prColorGFastDown.className = self.config.downFastIcon+" lsc-icon prcolor-green lsc-fastDown"
+                  prColorGFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_g","step":self.curValues["pong_result_color_g"].step_d_f})})
+                pongResultColorGreenWrapper.appendChild(prColorGFastDown)
 
-            pongResultColorOuterWrapper.appendChild(pongResultColorGreenWrapper)
+              pongResultColorOuterWrapper.appendChild(pongResultColorGreenWrapper)
 
-            //color blue
-            const pongResultColorBlueWrapper = document.createElement('div')
-              pongResultColorBlueWrapper.className="lsc-colorInnerWrapper lsc-prcolor-blue"
+              //color blue
+              const pongResultColorBlueWrapper = document.createElement('div')
+                pongResultColorBlueWrapper.className="lsc-colorInnerWrapper lsc-prcolor-blue"
 
-              const prColorBFastUp = document.createElement('i')
-                prColorBFastUp.className = self.config.upFastIcon+" lsc-icon lsc-prcolor-blue lsc-fastUp"
-                prColorBFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_b","step":self.curValues["pong_result_color_b"].step_u_f})})
-              pongResultColorBlueWrapper.appendChild(prColorBFastUp)
+                const prColorBFastUp = document.createElement('i')
+                  prColorBFastUp.className = self.config.upFastIcon+" lsc-icon lsc-prcolor-blue lsc-fastUp"
+                  prColorBFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_b","step":self.curValues["pong_result_color_b"].step_u_f})})
+                pongResultColorBlueWrapper.appendChild(prColorBFastUp)
 
-              const prColorBUp = document.createElement('i')
-                prColorBUp.className = self.config.upIcon+" lsc-icon lsc-prcolor-blue lsc-up"
-                prColorBUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_b","step":self.curValues["pong_result_color_b"].step_u})})
-              pongResultColorBlueWrapper.appendChild(prColorBUp)
+                const prColorBUp = document.createElement('i')
+                  prColorBUp.className = self.config.upIcon+" lsc-icon lsc-prcolor-blue lsc-up"
+                  prColorBUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"pong_result_color_b","step":self.curValues["pong_result_color_b"].step_u})})
+                pongResultColorBlueWrapper.appendChild(prColorBUp)
 
-              const prColorBValue = document.createElement('div')
-                prColorBValue.className = "lsc-value lsc-prcolor-blue"
+                const prColorBValue = document.createElement('div')
+                  prColorBValue.className = "lsc-value lsc-prcolor-blue"
 
-                if (self.curValues["pong_result_color_b"].selected == true){
-                  prColorBValue.className += " lsc-selected"
-                } else {
-                  prColorBValue.className += " lsc-unselected"
-                }
-  
-                self.curValues["pong_result_color_b"].obj = prColorBValue
-                self.elements.push("pong_result_color_b")
+                  if (self.curValues["pong_result_color_b"].selected == true){
+                    prColorBValue.className += " lsc-selected"
+                  } else {
+                    prColorBValue.className += " lsc-unselected"
+                  }
+    
+                  self.curValues["pong_result_color_b"].obj = prColorBValue
+                  self.elements.push("pong_result_color_b")
 
-                prColorBValue.innerHTML = self.curValues["pong_result_color_b"].value
-              pongResultColorBlueWrapper.appendChild(prColorBValue)
+                  prColorBValue.innerHTML = self.curValues["pong_result_color_b"].value
+                pongResultColorBlueWrapper.appendChild(prColorBValue)
 
-              const prColorBDown = document.createElement('i')
-                prColorBDown.className = self.config.downIcon+" lsc-icon lsc-prcolor-blue lsc-down"
-                prColorBDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_b","step":self.curValues["pong_result_color_b"].step_d})})
-              pongResultColorBlueWrapper.appendChild(prColorBDown)
+                const prColorBDown = document.createElement('i')
+                  prColorBDown.className = self.config.downIcon+" lsc-icon lsc-prcolor-blue lsc-down"
+                  prColorBDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_b","step":self.curValues["pong_result_color_b"].step_d})})
+                pongResultColorBlueWrapper.appendChild(prColorBDown)
 
-              const prColorBFastDown = document.createElement('i')
-                prColorBFastDown.className = self.config.downFastIcon+" lsc-icon prcolor-blue lsc-fastDown"
-                prColorBFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_b","step":self.curValues["pong_result_color_b"].step_d_f})})
-              pongResultColorBlueWrapper.appendChild(prColorBFastDown)
+                const prColorBFastDown = document.createElement('i')
+                  prColorBFastDown.className = self.config.downFastIcon+" lsc-icon prcolor-blue lsc-fastDown"
+                  prColorBFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":"pong_result_color_b","step":self.curValues["pong_result_color_b"].step_d_f})})
+                pongResultColorBlueWrapper.appendChild(prColorBFastDown)
 
-            pongResultColorOuterWrapper.appendChild(pongResultColorBlueWrapper)
+              pongResultColorOuterWrapper.appendChild(pongResultColorBlueWrapper)
 
-          pongResultColorWrapper.appendChild(pongResultColorOuterWrapper)
-        wrapper.appendChild(pongResultColorWrapper)
-
+            pongResultColorWrapper.appendChild(pongResultColorOuterWrapper)
+          wrapper.appendChild(pongResultColorWrapper)
+        }
       }
 
     return wrapper;
@@ -517,8 +519,8 @@ Module.register('MMM-LEDStripControl', {
       "color_r" : {"value":255, "step_u": 5, "step_d": 5, "step_u_f": 15, "step_d_f": 15, "min": 0, "max": 255, "selected": false, "obj" : null},
       "color_g" : {"value":255, "step_u": 5, "step_d": 5, "step_u_f": 15, "step_d_f": 15, "min": 0, "max": 255, "selected": false, "obj" : null},
       "color_b" : {"value":255, "step_u": 5, "step_d": 5, "step_u_f": 15, "step_d_f": 15, "min": 0, "max": 255, "selected": false, "obj" : null},
-      "pong_btn_delay": {"value": 2, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.2, "selected": false, "obj" : null},
-      "pong_init_delay" : {"value": 0.5, "step_u": 0.05, "step_d": 0.05, "step_u_f": 0.1, "step_d_f": 0.1, "min": 0.005, "selected": false, "obj" : null},
+      "pong_btn_delay": {"value": 2, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.5, "selected": false, "obj" : null},
+      "pong_init_delay" : {"value": 0.5, "step_u": 0.05, "step_d": 0.05, "step_u_f": 0.1, "step_d_f": 0.1, "min": 0.1, "selected": false, "obj" : null},
       "pong_dec_per_run" : {"value": 0.05, "step_u": 0.01, "step_d": 0.01, "step_u_f": 0.05, "step_d_f": 0.05, "min": 0, "selected": false, "obj" : null},
       "pong_min_delay" : {"value": 0.02, "step_u": 0.005, "step_d": 0.005, "step_u_f": 0.1, "step_d_f": 0.1, "min": 0.005, "selected": false, "obj" : null},
       "pong_num_leds" : {"value": 10, "step_u": 1, "step_d": 1, "step_u_f": 5, "step_d_f": 5, "min": 3, "selected": false, "obj" : null},
@@ -587,8 +589,6 @@ Module.register('MMM-LEDStripControl', {
             console.log("Could not find specified element. Aborting!")
             abort = true
           }
-        } else {
-          console.log("New element is old element!")
         }
       }
 
@@ -637,8 +637,6 @@ Module.register('MMM-LEDStripControl', {
             console.log("Could not find specified element. Aborting!")
             abort = true
           }
-        } else {
-          console.log("New element is old element!")
         }
       }
 
