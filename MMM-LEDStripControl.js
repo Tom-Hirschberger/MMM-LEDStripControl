@@ -22,49 +22,78 @@ Module.register('MMM-LEDStripControl', {
     fetchStatusInterval: 30
   },
 
+  suspend: function() {
+    const self = this
+    if(self.statusTimeout !== null){
+       clearTimeout(self.statusTimeout)
+       self.statusTimeout = null
+    }
+  },
+
+  resume: function() {
+    const self = this
+    self.scheduleStatusUpdate()
+  },
+
+  scheduleStatusUpdate(){
+    const self = this
+    self.statusTimeout = setTimeout(()=>{
+      self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
+  
+      self.statusTimeout = setTimeout(()=>{
+        self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
+      }, self.config.fetchStatusInterval * 1000)  
+    }, self.config.fetchStatusInterval * 1000)
+  },
+
   getStyles: function() {
     return ['font-awesome.css', 'ledstripcontrol.css']
   },
 
   getUpDownElement: function(key, cssClassPart){
     const self = this
-    let colorWrapper = document.createElement('div')
-      colorWrapper.className="lsc-colorInnerWrapper "+cssClassPart
+    let wrapper = document.createElement('div')
+      wrapper.className="lsc-up-down-wrapper "+cssClassPart
 
-      let colorFastUp = document.createElement('i')
-        colorFastUp.className = self.config.upFastIcon+" lsc-icon lsc-fastUp "+cssClassPart
-        colorFastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":key,"step":self.curValues[key].step_u_f})})
-      colorWrapper.appendChild(colorFastUp)
+      let fastUp = document.createElement('i')
+        fastUp.className = self.config.upFastIcon+" lsc-icon lsc-fastUp "+cssClassPart
+        fastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":key,"step":self.curValues[key].step_u_f})})
+      wrapper.appendChild(fastUp)
 
-      let colorUp = document.createElement('i')
-        colorUp.className = self.config.upIcon+" lsc-icon lsc-up "+cssClassPart
-        colorUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":key,"step":self.curValues[key].step_u})})
-      colorWrapper.appendChild(colorUp)
+      let up = document.createElement('i')
+        up.className = self.config.upIcon+" lsc-icon lsc-up "+cssClassPart
+        up.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":key,"step":self.curValues[key].step_u})})
+      wrapper.appendChild(up)
 
-      let colorValue = document.createElement('div')
-        colorValue.className = "lsc-value "+cssClassPart
+      let value = document.createElement('div')
+        value.className = "lsc-value "+cssClassPart
 
         if (self.curValues[key].selected == true){
-          colorValue.className += " lsc-selected"
+          value.className += " lsc-selected"
         } else {
-          colorValue.className += " lsc-unselected"
+          value.className += " lsc-unselected"
         }
 
-      self.curValues[key].obj = colorValue
+      self.curValues[key].obj = value
       self.elements.push(key)
-      colorValue.innerHTML = self.curValues[key].value          
-      colorWrapper.appendChild(colorValue)
+      if (typeof self.curValues[key].fractions !== "undefined"){
+        value.innerHTML = Number.parseFloat(self.curValues[key].value).toFixed(self.curValues[key].fractions)
+      } else {
+        value.innerHTML = self.curValues[key].value
+      }
+      
+      wrapper.appendChild(value)
 
-      let colorDown = document.createElement('i')
-        colorDown.className = self.config.downIcon+" lsc-icon lsc-down "+cssClassPart
-        colorDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":key,"step":self.curValues[key].step_d})})
-      colorWrapper.appendChild(colorDown)
+      let down = document.createElement('i')
+        down.className = self.config.downIcon+" lsc-icon lsc-down "+cssClassPart
+        down.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":key,"step":self.curValues[key].step_d})})
+      wrapper.appendChild(down)
 
-      let colorFastDown = document.createElement('i')
-        colorFastDown.className = self.config.downFastIcon+" lsc-icon lsc-fastDown "+cssClassPart
-        colorFastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":key,"step":self.curValues[key].step_d_f})})
-      colorWrapper.appendChild(colorFastDown)
-    return colorWrapper
+      let fastDown = document.createElement('i')
+        fastDown.className = self.config.downFastIcon+" lsc-icon lsc-fastDown "+cssClassPart
+        fastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":key,"step":self.curValues[key].step_d_f})})
+      wrapper.appendChild(fastDown)
+    return wrapper
   },
 
   getColorDomObject: function(keyPrefix, header, cssClassPart){
@@ -98,15 +127,48 @@ Module.register('MMM-LEDStripControl', {
     return colorWrapper
   },
 
+  getOptionsDomObject: function(header, elements, cssClassPart){
+    const self = this
+    let wrapper = document.createElement('div')
+      wrapper.className = "lsc-totalOptionsWrapper "+cssClassPart
+          
+      let optionsHeaderLine = document.createElement('div')
+        optionsHeaderLine.className = "lsc-options-header "+cssClassPart
+        optionsHeaderLine.innerHTML = header
+      wrapper.appendChild(optionsHeaderLine)
+          
+      let optionsOuterWrapper = document.createElement('div')
+        optionsOuterWrapper.className = "lsc-optionsOuterWrapper "+cssClassPart
+
+        for (let curIdx in elements){
+          let curElementKey = elements[curIdx][0]
+          let curElementHeader = elements[curIdx][1]
+
+          let optionsInnerWrapper = document.createElement('div')
+            optionsInnerWrapper.className = "lsc-optionsInnerWrapper "+cssClassPart+"-"+curElementKey
+
+            let optionsInnerHeader = document.createElement('div')
+              optionsInnerHeader.className = "lsc-optionsInnerHeader "+cssClassPart+"-"+curElementKey
+              optionsInnerHeader.innerHTML = curElementHeader
+            optionsInnerWrapper.appendChild(optionsInnerHeader)
+
+            optionsInnerWrapper.appendChild(self.getUpDownElement(curElementKey, cssClassPart+"-"+curElementKey))
+          optionsOuterWrapper.appendChild(optionsInnerWrapper)
+        }
+      wrapper.append(optionsOuterWrapper)
+
+      return wrapper
+  },
+
   getDom: function() {
     const self = this
     self.elements = []
-    const wrapper = document.createElement('div')
+    let wrapper = document.createElement('div')
       wrapper.className = "lsc-rootWrapper"
 
-      const outputWrapper = document.createElement('div')
+      let outputWrapper = document.createElement('div')
         outputWrapper.className = "lsc-outputWrapper"
-        const outputIcon = document.createElement('i')
+        let outputIcon = document.createElement('i')
         if(self.curValues["output"].value == true){
           outputIcon.className = self.config.outputOnIcon + " lsc-icon lsc-output lsc-output-on"
         } else {
@@ -129,16 +191,36 @@ Module.register('MMM-LEDStripControl', {
         wrapper.appendChild(self.getColorDomObject("color", "Color", "lsc-ncolor"))
       }
 
+      if (self.config.showPongColorOptions){
+        //color control of the pong colors
+        wrapper.appendChild(self.getColorDomObject("pong_color", "Pong Color", "lsc-pcolor"))
+
+        //color control of the pong result colors
+        wrapper.appendChild(self.getColorDomObject("pong_result_color", "Pong Result Color", "lsc-rcolor"))
+      }
 
       //pong options
       if (self.config.showPongOptions == true){
-        if (self.config.showPongColorOptions){
-          //color control of the pong colors
-          wrapper.appendChild(self.getColorDomObject("pong_color", "Pong Color", "lsc-pcolor"))
+        let pGeneralOptionsElements = [
+          ["pong_num_leds", "LEDs"],
+          ["pong_max_wins", "Wins"],
+          ["pong_tolerance", "Tolerance"]
+        ]
+        wrapper.append(self.getOptionsDomObject("Pong General", pGeneralOptionsElements, "lsc-pgeneral"))
 
-          //color control of the pong result colors
-          wrapper.appendChild(self.getColorDomObject("pong_result_color", "Pong Result Color", "lsc-rcolor"))
-        }
+        let pSpeedOptionsElements = [
+          ["pong_init_delay", "Init"],
+          ["pong_dec_per_run", "Decrement"],
+          ["pong_min_delay", "Min"]
+        ]
+        wrapper.append(self.getOptionsDomObject("Pong Speed", pSpeedOptionsElements, "lsc-pspeed"))
+
+        let pDelayOptionsElements = [
+          ["pong_btn_delay", "Button"],
+          ["pong_result_delay_during", "Result (D)"],
+          ["pong_result_delay_after", "Result (A)"]
+        ]
+        wrapper.append(self.getOptionsDomObject("Pong Delay", pDelayOptionsElements, "lsc-pdelay"))
       }
 
     return wrapper;
@@ -149,6 +231,7 @@ Module.register('MMM-LEDStripControl', {
     self.selectedElement = 0
 
     self.elements = []
+    self.statusTimeout = null
 
     self.curValues = {
       "output" : {"value":false, "selected": true, "obj" : null},
@@ -165,29 +248,23 @@ Module.register('MMM-LEDStripControl', {
       "pong_result_color_g" : {"value": 255, "step_u": 5, "step_d": 5, "step_u_f": 15, "step_d_f": 15, "min": 0, "max": 255, "selected": false, "obj" : null},
       "pong_result_color_b" : {"value": 0, "step_u": 5, "step_d": 5, "step_u_f": 15, "step_d_f": 15, "min": 0, "max": 255, "selected": false, "obj" : null},
 
-      "pong_init_delay" : {"value": 0.5, "step_u": 0.05, "step_d": 0.05, "step_u_f": 0.1, "step_d_f": 0.1, "min": 0.1, "selected": false, "obj" : null},
-      "pong_dec_per_run" : {"value": 0.05, "step_u": 0.01, "step_d": 0.01, "step_u_f": 0.05, "step_d_f": 0.05, "min": 0, "selected": false, "obj" : null},
-      "pong_min_delay" : {"value": 0.02, "step_u": 0.005, "step_d": 0.005, "step_u_f": 0.1, "step_d_f": 0.1, "min": 0.005, "selected": false, "obj" : null},
+      "pong_init_delay" : {"value": 0.5, "step_u": 0.05, "step_d": 0.05, "step_u_f": 0.1, "step_d_f": 0.1, "min": 0.1, "fractions": 2,"selected": false, "obj" : null},
+      "pong_dec_per_run" : {"value": 0.05, "step_u": 0.01, "step_d": 0.01, "step_u_f": 0.05, "step_d_f": 0.05, "min": 0, "fractions": 2, "selected": false, "obj" : null},
+      "pong_min_delay" : {"value": 0.02, "step_u": 0.005, "step_d": 0.005, "step_u_f": 0.1, "step_d_f": 0.1, "min": 0.005, "fractions": 3, "selected": false, "obj" : null},
 
       "pong_num_leds" : {"value": 10, "step_u": 1, "step_d": 1, "step_u_f": 5, "step_d_f": 5, "min": 3, "selected": false, "obj" : null},
       "pong_max_wins" : {"value": 2, "step_u": 1, "step_d": 1, "step_u_f": 3, "step_d_f": 3, "min": 1, "selected": false, "obj" : null},
       "pong_tolerance" : {"value": 2, "step_u": 1, "step_d": 1, "step_u_f": 3, "step_d_f": 3, "min": 0, "selected": false, "obj" : null},
 
-      "pong_result_delay_after" : {"value": 5, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.1, "selected": false, "obj" : null},
-      "pong_result_delay_during" : {"value": 3, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0, "selected": false, "obj" : null},
-      "pong_btn_delay": {"value": 2, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.5, "selected": false, "obj" : null},
+      "pong_result_delay_after" : {"value": 5, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.1, "fractions": 1, "selected": false, "obj" : null},
+      "pong_result_delay_during" : {"value": 3, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0, "fractions": 1, "selected": false, "obj" : null},
+      "pong_btn_delay": {"value": 2, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.5, "fractions": 1, "selected": false, "obj" : null},
     };
 
     Log.info("Starting module: " + self.name);
     self.sendSocketNotification('CONFIG', self.config)
 
-    setTimeout(()=>{
-      self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
-  
-      setTimeout(()=>{
-        self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
-      }, self.config.fetchStatusInterval * 1000)  
-    }, self.config.fetchStatusInterval * 1000)
+    self.scheduleStatusUpdate()
 
     setTimeout(()=>{
       self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
@@ -243,7 +320,7 @@ Module.register('MMM-LEDStripControl', {
           if (typeof payload.step !== "undefined"){
             step = payload.step
           }
-          self.curValues[self.elements[self.selectedElement]].value = self.curValues[self.elements[self.selectedElement]].value - step
+          self.curValues[self.elements[self.selectedElement]].value = (1*self.curValues[self.elements[self.selectedElement]].value) - step
 
           if (typeof self.curValues[self.elements[self.selectedElement]].min !== "undefined"){
             if (self.curValues[self.elements[self.selectedElement]].value < self.curValues[self.elements[self.selectedElement]].min){
@@ -291,13 +368,19 @@ Module.register('MMM-LEDStripControl', {
           if (typeof payload.step !== "undefined"){
             step = payload.step
           }
-          self.curValues[self.elements[self.selectedElement]].value = self.curValues[self.elements[self.selectedElement]].value + step
+
+          console.log("old value: "+self.curValues[self.elements[self.selectedElement]].value)
+          console.log("step: "+step)
+          self.curValues[self.elements[self.selectedElement]].value = (1*self.curValues[self.elements[self.selectedElement]].value) + step
+          console.log("new value before max check: "+self.curValues[self.elements[self.selectedElement]].value)
 
           if (typeof self.curValues[self.elements[self.selectedElement]].max !== "undefined"){
             if (self.curValues[self.elements[self.selectedElement]].value > self.curValues[self.elements[self.selectedElement]].max){
               self.curValues[self.elements[self.selectedElement]].value = self.curValues[self.elements[self.selectedElement]].max
             }
           }
+
+          console.log("new value after max check: "+self.curValues[self.elements[self.selectedElement]].value)
         }
         self.updateDom()
         if (self.elements[self.selectedElement] === "output"){
@@ -322,14 +405,30 @@ Module.register('MMM-LEDStripControl', {
 
   sendConfigurationNotification: function(){
     const self = this
-    let curConfigArray = { "pong": {}}
+    let curConfigArray = { }
+
+    console.log(JSON.stringify(self.curValues))
+
     for(let i = 0; i < self.elements.length; i++){
       let curName = self.elements[i]
       if(curName.startsWith("pong_")){
-        curConfigArray["pong"][curName.substring(5)] = self.curValues[curName].value
+        if (typeof curConfigArray["pong"] === "undefined"){
+          curConfigArray["pong"] = {}
+        }
+
+        if (typeof self.curValues[curName].fractions !== "undefined"){
+          curConfigArray["pong"][curName.substring(5)] = Number.parseFloat(self.curValues[curName].value).toFixed(self.curValues[curName].fractions)
+        } else {
+          curConfigArray["pong"][curName.substring(5)] = Number.parseInt(self.curValues[curName].value)
+        }
+        
       } else {
         if(curName !== "output"){
-          curConfigArray[curName] = self.curValues[curName].value
+          if (typeof self.curValues[curName].fractions !== "undefined"){
+            curConfigArray[curName] = Number.parseFloat(self.curValues[curName].value).toFixed(self.curValues[curName].fractions)
+          } else {
+            curConfigArray[curName] = Number.parseInt(self.curValues[curName].value)
+          }
         }
       }
     }

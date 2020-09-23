@@ -11,22 +11,26 @@
     padding: 5px;
 }
 
-.lsc-color-header {
+.lsc-color-header, .lsc-options-header {
     font-size: 20px;
 }
 
-.lsc-totalColorWrapper{
+.lsc-optionsInnerHeader {
+    font-size: 16px;
+}
+
+.lsc-totalColorWrapper, .lsc-totalOptionsWrapper{
     display: flex;
     flex-direction: column;
     margin: 5px;
 }
 
-.lsc-colorOuterWrapper{
+.lsc-colorOuterWrapper, .lsc-optionsOuterWrapper{
     display: flex;
     flex-direction: row;
 }
 
-.lsc-colorInnerWrapper {
+.lsc-up-down-wrapper, .lsc-optionsInnerWrapper{
     display:flex;
     flex-direction: column;
     align-items: center;
