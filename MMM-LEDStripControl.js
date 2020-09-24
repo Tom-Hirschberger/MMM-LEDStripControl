@@ -396,6 +396,8 @@ Module.register('MMM-LEDStripControl', {
       }
     } else if (notification === "LED_STRIP_CONTROL_STATUS_UPDATE"){
       self.updateValuesToNotificationPayload(payload)
+    } else if (notification === "LED_STRIP_CONTROL_TOGGLE_OUTPUT"){
+      self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE", {"element":"output"})
     }
   },
 
@@ -405,10 +407,7 @@ Module.register('MMM-LEDStripControl', {
 
   sendConfigurationNotification: function(){
     const self = this
-    let curConfigArray = { }
-
-    console.log(JSON.stringify(self.curValues))
-
+    let curConfigArray = {}
     for(let i = 0; i < self.elements.length; i++){
       let curName = self.elements[i]
       if(curName.startsWith("pong_")){
@@ -433,7 +432,7 @@ Module.register('MMM-LEDStripControl', {
       }
     }
 
-    console.log("Sending current config: "+JSON.stringify(curConfigArray))
+    console.log("Sending current config.")
     self.sendNotification("LED_STRIP_CONTROL_CURRENT_CONFIG", JSON.stringify(curConfigArray))
   },
 
