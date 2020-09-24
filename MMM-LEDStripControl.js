@@ -261,6 +261,40 @@ Module.register('MMM-LEDStripControl', {
       "pong_btn_delay": {"value": 2, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.5, "fractions": 1, "selected": false, "obj" : null},
     };
 
+    for (let key in self.curValues){
+      console.log("Checking config for key: "+key)
+      if (typeof self.config[key] !== "undefined"){
+        if (typeof self.config[key].value !== "undefined"){
+          console.log("Setting value of key: "+key+" to "+self.config[key].value)
+          self.curValues[key].value = self.config[key].value
+        }
+  
+        if (typeof self.config[key].step_u !== "undefined"){
+          self.curValues[key].step_u = self.config[key].step_u
+        }
+  
+        if (typeof self.config[key].step_d !== "undefined"){
+          self.curValues[key].step_d = self.config[key].step_d
+        }
+  
+        if (typeof self.config[key].step_u_f !== "undefined"){
+          self.curValues[key].step_u_f = self.config[key].step_u_f
+        }
+  
+        if (typeof self.config[key].step_d_f !== "undefined"){
+          self.curValues[key].step_d_f = self.config[key].step_d_f
+        }
+  
+        if (typeof self.config[key].min !== "undefined"){
+          self.curValues[key].min = self.config[key].min
+        }
+  
+        if (typeof self.config[key].max !== "undefined"){
+          self.curValues[key].max = self.config[key].max
+        }
+      }
+    }
+
     Log.info("Starting module: " + self.name);
     self.sendSocketNotification('CONFIG', self.config)
 
