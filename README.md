@@ -8,12 +8,12 @@ The current active element is marked with an red square. The active element can 
 ![All-options](https://github.com/Tom-Hirschberger/MMM-LEDStripControl/raw/master/screenshots/led-control-all-options.png "All options visible")
 
 ### Only color options visible ###
-![Color-options-only](https://github.com/Tom-Hirschberger/MMM-LEDStripControl/raw/master/screenshots/led-control-color-options-only "Only color options visible")
+![Color-options-only](https://github.com/Tom-Hirschberger/MMM-LEDStripControl/raw/master/screenshots/led-control-color-options-only.png "Only color options visible")
 
 ### Only normal options with and without color indicator ###
-![Normal-options-with-indicator](https://github.com/Tom-Hirschberger/MMM-LEDStripControl/raw/master/screenshots/led-control-normal-options-indicator.png "Normal options with indicator")
+![Normal-options-with-indicator](https://github.com/Tom-Hirschberger/MMM-LEDStripControl/raw/master/screenshots/led-control-normal-options-indictor.png "Normal options with indicator")
 
-![Normal-options-without-indicator](https://github.com/Tom-Hirschberger/MMM-LEDStripControl/raw/master/screenshots/led-control-normal-options-no-indicator.png "Normal options without indicator")
+![Normal-options-without-indicator](https://github.com/Tom-Hirschberger/MMM-LEDStripControl/raw/master/screenshots/led-control-normal-options-no-indictor.png "Normal options without indicator")
 
 ### Only output state visible ###
 ![Output-Only-On](https://github.com/Tom-Hirschberger/MMM-LEDStripControl/raw/master/screenshots/led-control-output-on.png "Only Output switch on")
