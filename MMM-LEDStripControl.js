@@ -19,7 +19,7 @@ Module.register('MMM-LEDStripControl', {
     upFastIcon: "fa fa-angle-double-up",
     downIcon: "fa fa-angle-down",
     downFastIcon: "fa fa-angle-double-down",
-    fetchStatusInterval: 30
+    fetchStatusInterval: 300,
   },
 
   suspend: function() {
