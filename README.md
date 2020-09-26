@@ -189,10 +189,22 @@ Send this notification to select the next element. If the end of the elments is 
 Send this notification to select the previous element. If the first elments is the current one it will start with the last one.
 
 #### LED_STRIP_CONTROL_INCREASE_VALUE ####
-Send this notification to increase the value of the current or a specific element.
+Send this notification to increase the value of the current or a specific element. The payload may contain the identifier of an element. If not the current selected one will be changed. If the payload does not contain an stepping the configured "step_u" value of the element is used.
+```json5
+    {
+        "element": "color_r",
+        "step": 5
+    }
+```
 
 #### LED_STRIP_CONTROL_DECREASE_VALUE ####
-Send this notification to decrease the value of the current or a specific element.
+Send this notification to decrease the value of the current or a specific element. The payload may contain the identifier of an element. If not the current selected one will be changed. If the payload does not contain an stepping the configured "step_d" value of the element is used.
+```json5
+    {
+        "element": "color_b",
+        "step": 10
+    }
+```
 
 #### LED_STRIP_CONTROL_TOGGLE_OUTPUT ####
 Send this notification to toggle the output.
