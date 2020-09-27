@@ -1,7 +1,7 @@
-# MMM-LEDStripControl ##
+# MMM-LEDStripControl #
 This module controls a led strip (in my case a WS2801 strip with 160 leds) with notifications that are converted to MQTT messages with help of the module MMM-MQTTbridge of sergge1 ([https://github.com/sergge1/MMM-MQTTbridge]). The led strip will be controlled with a Python based script that runs on a second Raspberry Pi which is connected to the network and registers to the MQTT topics.
 The different configuration options of the led strip are grouped into element groups. It is possible to hide unneeded groups.
-The current active element is marked with an red square. The active element can be changed either by touch or notification. Also the values can be changed by notification or touch. The touch icons provide to different steppings for up and down.
+The current active element is marked with an red square. The active element can be changed either by touch or notification. Also the values can be changed by notification or touch. The touch icons provide two different steppings for up and down.
 
 ## Screenshots ##
 ### All options visible ###
@@ -125,6 +125,9 @@ Basically you do not need to configure anything more than this to get the module
             },
         },
 ```
+
+This module supports multi instance. If you want to add more than one instance to the mirror do not forget to set the "instance" option which will be explained in the next section!
+
 ### General ###
 If you like you can change some options:
 
@@ -141,6 +144,7 @@ If you like you can change some options:
 | upFastIcon | You may like to change the icon of the fast up symbol. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-angle-double-up" |
 | downIcon | You may like to change the icon of the down symbol. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-angle-down" |
 | downFastIcon | You may like to change the icon of fast down symbol. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-angle-double-down" |
+| instance | If you want to add more than one instance of this module please specify an instance number with this variable. All notifications will be suffixed with "_"+instance (i.e. "LED_STRIP_CONTROL_NEXT_ELEMENT_1") and each element gets an css class "lsc-"+instance. The instance with number 0 (default) will react to and sends notifications without suffix! | Integer | 0 |
 
 ### Min/Max and Stepping ###
 To change the min/max values or the stepping the elements get increased (up -> u) or decreased (down -> d) you can add an partly configuration for each element. You only need to provide the values that you want to change for the elements you want to change of:

@@ -20,6 +20,7 @@ Module.register('MMM-LEDStripControl', {
     downIcon: "fa fa-angle-down",
     downFastIcon: "fa fa-angle-double-down",
     fetchStatusInterval: 300,
+    instance: 0
   },
 
   suspend: function() {
@@ -38,10 +39,10 @@ Module.register('MMM-LEDStripControl', {
   scheduleStatusUpdate(){
     const self = this
     self.statusTimeout = setTimeout(()=>{
-      self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
+      self.sendNotification(self.notifications["LED_STRIP_CONTROL_FETCH_STATUS"],"dummy")
   
       self.statusTimeout = setTimeout(()=>{
-        self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
+        self.sendNotification(self.notifications["LED_STRIP_CONTROL_FETCH_STATUS"],"dummy")
       }, self.config.fetchStatusInterval * 1000)  
     }, self.config.fetchStatusInterval * 1000)
   },
@@ -57,12 +58,12 @@ Module.register('MMM-LEDStripControl', {
 
       let fastUp = document.createElement('i')
         fastUp.className = self.config.upFastIcon+" lsc-icon lsc-fastUp "+cssClassPart
-        fastUp.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":key,"step":self.curValues[key].step_u_f})})
+        fastUp.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"],{"element":key,"step":self.curValues[key].step_u_f})})
       wrapper.appendChild(fastUp)
 
       let up = document.createElement('i')
         up.className = self.config.upIcon+" lsc-icon lsc-up "+cssClassPart
-        up.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":key,"step":self.curValues[key].step_u})})
+        up.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"],{"element":key,"step":self.curValues[key].step_u})})
       wrapper.appendChild(up)
 
       let value = document.createElement('div')
@@ -86,12 +87,12 @@ Module.register('MMM-LEDStripControl', {
 
       let down = document.createElement('i')
         down.className = self.config.downIcon+" lsc-icon lsc-down "+cssClassPart
-        down.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":key,"step":self.curValues[key].step_d})})
+        down.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_DECREASE_VALUE"],{"element":key,"step":self.curValues[key].step_d})})
       wrapper.appendChild(down)
 
       let fastDown = document.createElement('i')
         fastDown.className = self.config.downFastIcon+" lsc-icon lsc-fastDown "+cssClassPart
-        fastDown.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_DECREASE_VALUE",{"element":key,"step":self.curValues[key].step_d_f})})
+        fastDown.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_DECREASE_VALUE"],{"element":key,"step":self.curValues[key].step_d_f})})
       wrapper.appendChild(fastDown)
     return wrapper
   },
@@ -164,15 +165,15 @@ Module.register('MMM-LEDStripControl', {
     const self = this
     self.elements = []
     let wrapper = document.createElement('div')
-      wrapper.className = "lsc-rootWrapper"
+      wrapper.className = self.instanceCssClass+" lsc-rootWrapper"
 
       let outputWrapper = document.createElement('div')
-        outputWrapper.className = "lsc-outputWrapper"
+        outputWrapper.className = "lsc-outputWrapper "+self.instanceCssClass
         let outputIcon = document.createElement('i')
         if(self.curValues["output"].value == true){
-          outputIcon.className = self.config.outputOnIcon + " lsc-icon lsc-output lsc-output-on"
+          outputIcon.className = self.config.outputOnIcon + " lsc-icon lsc-output lsc-output-on "+self.instanceCssClass
         } else {
-          outputIcon.className = self.config.outputOffIcon + " lsc-icon lsc-output lsc-output-off"
+          outputIcon.className = self.config.outputOffIcon + " lsc-icon lsc-output lsc-output-off "+self.instanceCssClass
         }
 
         if (self.curValues["output"].selected == true){
@@ -181,22 +182,22 @@ Module.register('MMM-LEDStripControl', {
           outputIcon.className += " lsc-unselected"
         }
         self.curValues["output"].obj = outputIcon
-        outputIcon.addEventListener("click", ()=>{self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE",{"element":"output"})})
+        outputIcon.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"],{"element":"output"})})
         self.elements.push("output")
 
         outputWrapper.appendChild(outputIcon)
       wrapper.appendChild(outputWrapper)
 
       if (self.config.showNormalColorOptions){
-        wrapper.appendChild(self.getColorDomObject("color", "Color", "lsc-ncolor"))
+        wrapper.appendChild(self.getColorDomObject("color", "Color", self.instanceCssClass+" lsc-ncolor"))
       }
 
       if (self.config.showPongColorOptions){
         //color control of the pong colors
-        wrapper.appendChild(self.getColorDomObject("pong_color", "Pong Color", "lsc-pcolor"))
+        wrapper.appendChild(self.getColorDomObject("pong_color", "Pong Color", self.instanceCssClass+" lsc-pcolor"))
 
         //color control of the pong result colors
-        wrapper.appendChild(self.getColorDomObject("pong_result_color", "Pong Result Color", "lsc-rcolor"))
+        wrapper.appendChild(self.getColorDomObject("pong_result_color", "Pong Result Color", self.instanceCssClass+" lsc-rcolor"))
       }
 
       //pong options
@@ -261,6 +262,33 @@ Module.register('MMM-LEDStripControl', {
       "pong_btn_delay": {"value": 2, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.5, "fractions": 1, "selected": false, "obj" : null},
     };
 
+    self.instanceCssClass = "lsc-"+self.config.instance
+    if (self.config.instance > 0){
+      self.notifications = {
+        "LED_STRIP_CONTROL_FETCH_STATUS": "LED_STRIP_CONTROL_FETCH_STATUS_"+self.config.instance,
+        "LED_STRIP_CONTROL_INCREASE_VALUE": "LED_STRIP_CONTROL_INCREASE_VALUE_"+self.config.instance,
+        "LED_STRIP_CONTROL_DECREASE_VALUE": "LED_STRIP_CONTROL_DECREASE_VALUE_"+self.config.instance,
+        "LED_STRIP_CONTROL_OUTPUT": "LED_STRIP_CONTROL_OUTPUT_"+self.config.instance,
+        "LED_STRIP_CONTROL_STATUS_UPDATE": "LED_STRIP_CONTROL_STATUS_UPDATE_"+self.config.instance,
+        "LED_STRIP_CONTROL_TOGGLE_OUTPUT": "LED_STRIP_CONTROL_TOGGLE_OUTPUT_"+self.config.instance,
+        "LED_STRIP_CONTROL_NEXT_ELEMENT": "LED_STRIP_CONTROL_NEXT_ELEMENT_"+self.config.instance,
+        "LED_STRIP_CONTROL_PREVIOUS_ELEMENT": "LED_STRIP_CONTROL_PREVIOUS_ELEMENT_"+self.config.instance,
+        "LED_STRIP_CONTROL_CURRENT_CONFIG": "LED_STRIP_CONTROL_CURRENT_CONFIG_"+self.config.instance,
+      }
+    } else {
+      self.notifications = {
+        "LED_STRIP_CONTROL_FETCH_STATUS": "LED_STRIP_CONTROL_FETCH_STATUS",
+        "LED_STRIP_CONTROL_INCREASE_VALUE": "LED_STRIP_CONTROL_INCREASE_VALUE",
+        "LED_STRIP_CONTROL_DECREASE_VALUE": "LED_STRIP_CONTROL_DECREASE_VALUE",
+        "LED_STRIP_CONTROL_OUTPUT": "LED_STRIP_CONTROL_OUTPUT",
+        "LED_STRIP_CONTROL_STATUS_UPDATE": "LED_STRIP_CONTROL_STATUS_UPDATE",
+        "LED_STRIP_CONTROL_TOGGLE_OUTPUT": "LED_STRIP_CONTROL_TOGGLE_OUTPUT",
+        "LED_STRIP_CONTROL_NEXT_ELEMENT": "LED_STRIP_CONTROL_NEXT_ELEMENT",
+        "LED_STRIP_CONTROL_PREVIOUS_ELEMENT": "LED_STRIP_CONTROL_PREVIOUS_ELEMENT",
+        "LED_STRIP_CONTROL_CURRENT_CONFIG": "LED_STRIP_CONTROL_CURRENT_CONFIG",
+      }
+    }
+
     for (let key in self.curValues){
       console.log("Checking config for key: "+key)
       if (typeof self.config[key] !== "undefined"){
@@ -308,7 +336,7 @@ Module.register('MMM-LEDStripControl', {
   notificationReceived: function (notification, payload) {
     const self = this
 
-    if (notification === "LED_STRIP_CONTROL_NEXT_ELEMENT"){
+    if (notification === self.notifications["LED_STRIP_CONTROL_NEXT_ELEMENT"]){
       console.log("Changing to next element")
       self.curValues[self.elements[self.selectedElement]].selected = false
       self.selectedElement += 1
@@ -319,7 +347,7 @@ Module.register('MMM-LEDStripControl', {
       console.log("Changing to element: "+self.selectedElement+ " which is: "+self.elements[self.selectedElement])
       self.curValues[self.elements[self.selectedElement]].selected = true
       self.updateDom()
-    } else if (notification === "LED_STRIP_CONTROL_PREVIOUS_ELEMENT"){
+    } else if (notification === self.notifications["LED_STRIP_CONTROL_PREVIOUS_ELEMENT"]){
       self.curValues[self.elements[self.selectedElement]].selected = false
       self.selectedElement -= 1
       
@@ -329,7 +357,7 @@ Module.register('MMM-LEDStripControl', {
       console.log("Changing to element: "+self.selectedElement+ " which is: "+self.elements[self.selectedElement])
       self.curValues[self.elements[self.selectedElement]].selected = true
       self.updateDom()
-    } else if (notification === "LED_STRIP_CONTROL_DECREASE_VALUE"){
+    } else if (notification === self.notifications["LED_STRIP_CONTROL_DECREASE_VALUE"]){
       let abort = false
       if (typeof payload.element !== "undefined"){
         if (self.elements[self.selectedElement] !== payload.element){
@@ -367,9 +395,9 @@ Module.register('MMM-LEDStripControl', {
 
         if (self.elements[self.selectedElement] === "output"){
           if(self.curValues[self.elements[self.selectedElement]].value == true){
-            self.sendNotification("LED_STRIP_CONTROL_OUTPUT", "on")
+            self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "on")
           } else {
-            self.sendNotification("LED_STRIP_CONTROL_OUTPUT", "off")
+            self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "off")
           }
           
         } else {
@@ -377,7 +405,7 @@ Module.register('MMM-LEDStripControl', {
         }
         
       }
-    } else if (notification === "LED_STRIP_CONTROL_INCREASE_VALUE"){
+    } else if (notification === self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"]){
       let abort = false
       if (typeof payload.element !== "undefined"){
         if (self.elements[self.selectedElement] !== payload.element){
@@ -419,19 +447,19 @@ Module.register('MMM-LEDStripControl', {
         self.updateDom()
         if (self.elements[self.selectedElement] === "output"){
           if(self.curValues[self.elements[self.selectedElement]].value == true){
-            self.sendNotification("LED_STRIP_CONTROL_OUTPUT", "on")
+            self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "on")
           } else {
-            self.sendNotification("LED_STRIP_CONTROL_OUTPUT", "off")
+            self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "off")
           }
           
         } else {
           self.sendConfigurationNotification()
         }
       }
-    } else if (notification === "LED_STRIP_CONTROL_STATUS_UPDATE"){
+    } else if (notification === self.notifications["LED_STRIP_CONTROL_STATUS_UPDATE"]){
       self.updateValuesToNotificationPayload(payload)
-    } else if (notification === "LED_STRIP_CONTROL_TOGGLE_OUTPUT"){
-      self.notificationReceived("LED_STRIP_CONTROL_INCREASE_VALUE", {"element":"output"})
+    } else if (notification === self.notifications["LED_STRIP_CONTROL_TOGGLE_OUTPUT"]){
+      self.notificationReceived(self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"], {"element":"output"})
     }
   },
 
@@ -467,7 +495,7 @@ Module.register('MMM-LEDStripControl', {
     }
 
     console.log("Sending current config.")
-    self.sendNotification("LED_STRIP_CONTROL_CURRENT_CONFIG", JSON.stringify(curConfigArray))
+    self.sendNotification(self.notifications["LED_STRIP_CONTROL_CURRENT_CONFIG"], JSON.stringify(curConfigArray))
   },
 
   updateValuesToNotificationPayload: function(newValues){
