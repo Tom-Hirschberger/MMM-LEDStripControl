@@ -145,6 +145,7 @@ If you like you can change some options:
 | downIcon | You may like to change the icon of the down symbol. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-angle-down" |
 | downFastIcon | You may like to change the icon of fast down symbol. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-angle-double-down" |
 | instance | If you want to add more than one instance of this module please specify an instance number with this variable. All notifications will be suffixed with "_"+instance (i.e. "LED_STRIP_CONTROL_NEXT_ELEMENT_1") and each element gets an css class "lsc-"+instance. The instance with number 0 (default) will react to and sends notifications without suffix! | Integer | 0 |
+| instanceCssClass | All elements if this instance get this css class added. If you like to control the same strip but with two instances of the module (i.e. because you use the profile or pages module) you can leave the instance number as it is and only change the css stuff if you like (i.e. smaller module) | String | "lsc-"+instance (i.e. "lsc-0") |
 
 ### Min/Max and Stepping ###
 To change the min/max values or the stepping the elements get increased (up -> u) or decreased (down -> d) you can add an partly configuration for each element. You only need to provide the values that you want to change for the elements you want to change of:
