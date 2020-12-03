@@ -20,7 +20,8 @@ Module.register('MMM-LEDStripControl', {
     downIcon: "fa fa-angle-down",
     downFastIcon: "fa fa-angle-double-down",
     fetchStatusInterval: 300,
-    instance: 0
+    instance: 0,
+    instanceCssClass: null
   },
 
   suspend: function() {
@@ -39,9 +40,11 @@ Module.register('MMM-LEDStripControl', {
   scheduleStatusUpdate(){
     const self = this
     self.statusTimeout = setTimeout(()=>{
+      console.log(self.name+": "+"Fetching current status!")
       self.sendNotification(self.notifications["LED_STRIP_CONTROL_FETCH_STATUS"],"dummy")
   
       self.statusTimeout = setTimeout(()=>{
+        console.log(self.name+": "+"Fetching current status!")
         self.sendNotification(self.notifications["LED_STRIP_CONTROL_FETCH_STATUS"],"dummy")
       }, self.config.fetchStatusInterval * 1000)  
     }, self.config.fetchStatusInterval * 1000)
@@ -262,7 +265,12 @@ Module.register('MMM-LEDStripControl', {
       "pong_btn_delay": {"value": 2, "step_u": 0.5, "step_d": 0.5, "step_u_f": 1, "step_d_f": 1, "min": 0.5, "fractions": 1, "selected": false, "obj" : null},
     };
 
-    self.instanceCssClass = "lsc-"+self.config.instance
+    if (self.config.instanceCssClass == null){
+      self.instanceCssClass = "lsc-"+self.config.instance
+    } else {
+      self.instanceCssClass = self.config.instanceCssClass
+    }
+    
     if (self.config.instance > 0){
       self.notifications = {
         "LED_STRIP_CONTROL_FETCH_STATUS": "LED_STRIP_CONTROL_FETCH_STATUS_"+self.config.instance,
@@ -329,8 +337,9 @@ Module.register('MMM-LEDStripControl', {
     self.scheduleStatusUpdate()
 
     setTimeout(()=>{
-      self.sendNotification("LED_STRIP_CONTROL_FETCH_STATUS","dummy")
-    }, 1000)
+      console.log(self.name+": "+"Fetching current status with noti: "+self.notifications["LED_STRIP_CONTROL_FETCH_STATUS"])
+      self.sendNotification(self.notifications["LED_STRIP_CONTROL_FETCH_STATUS"],"dummy")
+    }, 10000)
   },
 
   notificationReceived: function (notification, payload) {
@@ -395,8 +404,10 @@ Module.register('MMM-LEDStripControl', {
 
         if (self.elements[self.selectedElement] === "output"){
           if(self.curValues[self.elements[self.selectedElement]].value == true){
+            console.log(self.name+": "+"Switch the lights on")
             self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "on")
           } else {
+            console.log(self.name+": "+"Switch the lights off")
             self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "off")
           }
           
@@ -447,8 +458,10 @@ Module.register('MMM-LEDStripControl', {
         self.updateDom()
         if (self.elements[self.selectedElement] === "output"){
           if(self.curValues[self.elements[self.selectedElement]].value == true){
+            console.log(self.name+": "+"Switch the lights on")
             self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "on")
           } else {
+            console.log(self.name+": "+"Switch the lights off")
             self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "off")
           }
           
@@ -494,7 +507,7 @@ Module.register('MMM-LEDStripControl', {
       }
     }
 
-    console.log("Sending current config.")
+    console.log(self.name+": "+"Sending current config")
     self.sendNotification(self.notifications["LED_STRIP_CONTROL_CURRENT_CONFIG"], JSON.stringify(curConfigArray))
   },
 
