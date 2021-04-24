@@ -1,3 +1,18 @@
+//LED Strip: BTF-LIGHTING WS2815 -> https://www.amazon.de/gp/product/B07LG5ZT9C/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1
+//Power Supply: HuaTec LED Trafo 12V 120W -> https://www.amazon.de/gp/product/B0829817YM/ref=ppx_yo_dt_b_asin_image_o09_s00?ie=UTF8&psc=1
+//Step-Down-Module: AZDelivery XL4015 -> https://www.amazon.de/gp/product/B07SRXR1VT/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&th=1
+//Board: AZDelivery ESP32 Dev Kit C V4 -> https://www.amazon.de/gp/product/B08BTS62L7/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+//Logic Level Converter: ARCELI 4 Channel I2C Converter -> https://www.amazon.de/gp/product/B07RDHR315/ref=ppx_yo_dt_b_search_asin_image?ie=UTF8&psc=1
+//2 x Tactile Push Button (Something like https://www.amazon.de/gp/product/B078ZDK6KZ/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1)
+//2 x Capacitor 0.1 Mikrofarad
+//2 x Resistor: 10 kOhm
+//Arduino Version: 1.8.13
+//Board Firmware: ESP32 by Espressif Systems Version 1.0.6
+//Libs:
+//  FastLED by Daniel Garcia Version 3.3.3
+//  PubSubClient by Nick O'Leary Version 2.8.0 
+//  ArduinoJson by Benoit Blanchon Version 6.17.3
+
 #include <WiFi.h>
 #include <FastLED.h>
 #include <PubSubClient.h>
@@ -10,7 +25,7 @@
 #define CLOCK_PIN 14
 #define BTN_1_GPIO 23
 #define BTN_2_GPIO 22
-#define BTN_DEBOUNCE_DELAY 200
+#define BTN_DEBOUNCE_DELAY 500
 #define PONG_BTN_DELAY 2.000
 #define PONG_MAX_WINS 2
 #define PONG_TOLERANCE 2
@@ -24,12 +39,11 @@ CRGB leds[MAX_LEDS];
  
 const char* SSID = "ENTER_WIFI_SSID_HERE";
 const char* PSK = "ENTER_WIFI_PASSWORD_HERE";
-const char* MQTT_BROKER = "ENTER_MQTT_BROKER_ADDRESS_HERE";
-const char* MQTT_USER = "ENTER_MQTT_USER_HERE";
+const char* MQTT_BROKER = "ENTER_MQTT_SERVER_ADDRESS_HERE";
+const char* MQTT_USER = "ENTER_MQTT_USERNAME_HERE";
 const char* MQTT_PASS = "ENTER_MQTT_PASSWORD_HERE";
 const String clientName = "ESP_LED";
 const String topicId = "esp_led";
-long interval = 10000;
  
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -348,7 +362,7 @@ void setup() {
     
 
     delay(200);
-    FastLED.addLeds<WS2813, DATA_PIN, RGB>(leds, MAX_LEDS);
+    FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, MAX_LEDS);
     for (int i=0; i < MAX_LEDS; i++){
       leds[i] = CRGB::Black;
     }
@@ -367,8 +381,8 @@ void setup() {
     pinMode(BTN_1_GPIO, INPUT);
     pinMode(BTN_2_GPIO, INPUT);
 
-    attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, LOW);
-    attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, LOW);    
+    attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, FALLING);
+    attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, FALLING);    
     delay(500);
 }
  
@@ -553,10 +567,13 @@ void loop() {
     if (btn_two_state == 1){
       btn_two_state = 0;
       Serial.println("Button two pressed.");
-      if ((btn_two_last_pressed - btn_one_last_pressed) < pong_btn_delay){
+      if ((btn_two_last_pressed - btn_one_last_pressed) < (pong_btn_delay*1000)){
         Serial.println("Switching to pong mode.");
         switchToPongMode();
       } else {
+        Serial.println(btn_two_last_pressed);
+        Serial.println(btn_one_last_pressed);
+        Serial.println(pong_btn_delay);
         Serial.println("Toggling led stripe.");
         toggle_leds(-1);
       }
