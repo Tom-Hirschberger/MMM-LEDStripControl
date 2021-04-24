@@ -9,10 +9,9 @@
 //Arduino Version: 1.8.13
 //Board Firmware: ESP32 by Espressif Systems Version 1.0.6
 //Libs:
-//  FastLED by Daniel Garcia Version 3.3.3
+//  FastLED by Daniel Garcia Version 3.4.0
 //  PubSubClient by Nick O'Leary Version 2.8.0 
 //  ArduinoJson by Benoit Blanchon Version 6.17.3
-
 #include <WiFi.h>
 #include <FastLED.h>
 #include <PubSubClient.h>
@@ -22,7 +21,6 @@
 #define NUM_LEDS 300
 #define NUM_PONG_LEDS 10
 #define DATA_PIN 14
-#define CLOCK_PIN 14
 #define BTN_1_GPIO 23
 #define BTN_2_GPIO 22
 #define BTN_DEBOUNCE_DELAY 500
@@ -34,6 +32,7 @@
 #define PONG_MIN_LED_DELAY 0.02
 #define PONG_RESULT_DELAY_DURING 2.0
 #define PONG_RESULT_DELAY_AFTER 5.0
+#define REFRESH_INTERVAL 10000
 
 CRGB leds[MAX_LEDS];
  
@@ -51,12 +50,15 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
+long last_refresh = 0;
+
 int reverseMode=0;
 int cur_pixel=0;
 int btn_one_state = 0;
 long btn_one_last_pressed = 0;
 int btn_two_state = 0;
 long btn_two_last_pressed = 0;
+
 
 int color_r = 255;
 int color_g = 255;
@@ -360,26 +362,28 @@ void setup() {
       publish_current_status();
     }
     
-
-    delay(200);
     FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, MAX_LEDS);
     for (int i=0; i < MAX_LEDS; i++){
       leds[i] = CRGB::Black;
     }
+    FastLED.show();
     FastLED.show();
     delay(50);
     for (int i=0; i < MAX_LEDS; i++){
       leds[i] = CRGB::White;
     }
     FastLED.show();
+    FastLED.show();
     delay(200);
     for (int i=0; i < MAX_LEDS; i++){
       leds[i] = CRGB::Black;
     }
     FastLED.show();
+    FastLED.show();
 
     pinMode(BTN_1_GPIO, INPUT);
     pinMode(BTN_2_GPIO, INPUT);
+    pinMode(DATA_PIN, OUTPUT);
 
     attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, FALLING);
     attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, FALLING);    
@@ -502,6 +506,10 @@ void toggle_leds(int to_state){
   }
 
   FastLED.show();
+  FastLED.show();
+  if (publish_status_if_toggled == 1){
+    publish_current_status();
+  }
 }
 
 void switchToPongMode(){
@@ -517,6 +525,7 @@ void switchToPongMode(){
       leds[i] = CRGB::Black;
   }
   FastLED.show();
+  FastLED.show();
   delay(1000);
   for (int i = 0; i< num_pong_leds; i++){
       leds[i].r = pong_color_r;
@@ -524,10 +533,12 @@ void switchToPongMode(){
       leds[i].b = pong_color_b;
   }
   FastLED.show();
+  FastLED.show();
   delay(1000);
   for (int i = 0; i< NUM_LEDS; i++){
       leds[i] = CRGB::Black;
   }
+  FastLED.show();
   FastLED.show();
   delay(1000);
 }
@@ -550,6 +561,7 @@ void displayResult(float cur_delay){
     leds[i].b = pong_result_color_b;
   }
   FastLED.show();
+  FastLED.show();
   delay(cur_delay*1000);
 }
 
@@ -564,25 +576,32 @@ void loop() {
   client.loop();
   
   if (stripe_mode == 0){
-    if (btn_two_state == 1){
-      btn_two_state = 0;
-      Serial.println("Button two pressed.");
-      if ((btn_two_last_pressed - btn_one_last_pressed) < (pong_btn_delay*1000)){
-        Serial.println("Switching to pong mode.");
-        switchToPongMode();
-      } else {
-        Serial.println(btn_two_last_pressed);
-        Serial.println(btn_one_last_pressed);
-        Serial.println(pong_btn_delay);
-        Serial.println("Toggling led stripe.");
+    if ((btn_one_state == 1) or (btn_two_state == 1)){
+      if (btn_two_state == 1){
+        btn_two_state = 0;
+        Serial.println("Button two pressed.");
+        if ((btn_two_last_pressed - btn_one_last_pressed) < (pong_btn_delay*1000)){
+          Serial.println("Switching to pong mode.");
+          switchToPongMode();
+        } else {
+          Serial.println(btn_two_last_pressed);
+          Serial.println(btn_one_last_pressed);
+          Serial.println(pong_btn_delay);
+          Serial.println("Toggling led stripe.");
+          toggle_leds(-1);
+        }
+      }
+  
+      if (btn_one_state == 1){
+        btn_one_state = 0;
+        Serial.println("Button one pressed. Toggling led stripe.");
         toggle_leds(-1);
       }
-    }
-
-    if (btn_one_state == 1){
-      btn_one_state = 0;
-      Serial.println("Button one pressed. Toggling led stripe.");
-      toggle_leds(-1);
+    } else {
+      if((millis() - last_refresh) > REFRESH_INTERVAL){
+        FastLED.show();
+        FastLED.show(); 
+      }
     }
   } else if (stripe_mode == 1){
     for (int i=0; i < NUM_LEDS; i++){
@@ -592,6 +611,7 @@ void loop() {
     leds[cur_pixel].r = pong_color_r;
     leds[cur_pixel].g = pong_color_g;
     leds[cur_pixel].b = pong_color_b; 
+    FastLED.show();
     FastLED.show(); 
 
     delay(cur_pong_delay*1000);
