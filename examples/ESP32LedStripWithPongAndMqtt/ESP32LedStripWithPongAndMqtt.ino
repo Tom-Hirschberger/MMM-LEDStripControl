@@ -229,124 +229,137 @@ void callback(char* topic, byte* message, unsigned int length) {
     messageTemp += (char)message[i];
   }
   Serial.println();
-  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
-  // Changes the output state according to the message
-  if (String(topic) == topicId+"/output") {
-    Serial.print("Changing output to ");
-    if(messageTemp == "on"){
-      Serial.println("on");
-      toggle_leds(1);
-    }
-    else if(messageTemp == "off"){
-      Serial.println("off");
-      toggle_leds(0);
-    } else {
-      Serial.println("toggle");
-      toggle_leds(-1);
-    }
-  } else if (String(topic) == topicId+"/config"){
-    StaticJsonDocument<1024> doc;
-    DeserializationError err = deserializeJson(doc, messageTemp);
-    int cur_int_tmp_value = -1;
-    float cur_float_tmp_value = -1;
-    boolean cur_bool_tmp_value = false;
-    if (!err){
 
-      if(doc["pong"]["btn_delay"]){
-        pong_btn_delay = doc["pong"]["btn_delay"].as<float>(); 
+  if (! (String(topic) == topicId+"/btn") ) {
+    // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
+    // Changes the output state according to the message
+    if (String(topic) == topicId+"/output") {
+      Serial.print("Changing output to ");
+      if(messageTemp == "on"){
+        Serial.println("on");
+        toggle_leds(1);
       }
-
-      if(doc["pong"]["init_delay"]){
-        pong_init_delay = doc["pong"]["init_delay"].as<float>(); 
+      else if(messageTemp == "off"){
+        Serial.println("off");
+        toggle_leds(0);
+      } else {
+        Serial.println("toggle");
+        toggle_leds(-1);
       }
-
-      if(doc["pong"]["min_delay"]){
-        pong_min_delay = doc["pong"]["min_delay"].as<float>(); 
+    } else if (String(topic) == topicId+"/config"){
+      StaticJsonDocument<1024> doc;
+      DeserializationError err = deserializeJson(doc, messageTemp);
+      int cur_int_tmp_value = -1;
+      float cur_float_tmp_value = -1;
+      boolean cur_bool_tmp_value = false;
+      if (!err){
+  
+        if(doc["pong"]["btn_delay"]){
+          pong_btn_delay = doc["pong"]["btn_delay"].as<float>(); 
+        }
+  
+        if(doc["pong"]["init_delay"]){
+          pong_init_delay = doc["pong"]["init_delay"].as<float>(); 
+        }
+  
+        if(doc["pong"]["min_delay"]){
+          pong_min_delay = doc["pong"]["min_delay"].as<float>(); 
+        }
+        
+        if(doc["pong"]["dec_per_run"]){
+          pong_dec_per_run = doc["pong"]["dec_per_run"].as<float>(); 
+        }
+        
+        num_pong_leds = doc["pong"]["num_leds"] | num_pong_leds;
+        pong_max_wins = doc["pong"]["max_wins"] | pong_max_wins;
+        pong_tolerance = doc["pong"]["tolerance"] | pong_tolerance;
+  
+        if(doc["pong"]["result_delay_during"]){
+          pong_wins_delay_during = doc["pong"]["result_delay_during"].as<float>();
+        }
+  
+        if(doc["pong"]["result_delay_after"]){
+          pong_wins_delay_after = doc["pong"]["result_delay_after"].as<float>();
+        }
+  
+        pong_color_r = doc["pong"]["color_r"] | pong_color_r;
+        pong_color_g = doc["pong"]["color_g"] | pong_color_g;
+        pong_color_b = doc["pong"]["color_b"] | pong_color_b;
+  
+        pong_result_color_r = doc["pong"]["result_color_r"] | pong_result_color_r;
+        pong_result_color_g = doc["pong"]["result_color_g"] | pong_result_color_g;
+        pong_result_color_b = doc["pong"]["result_color_b"] | pong_result_color_b;
+  
+        color_r = doc["color_r"] | color_r;
+        color_g = doc["color_g"] | color_g;
+        color_b = doc["color_b"] | color_b;
       }
       
-      if(doc["pong"]["dec_per_run"]){
-        pong_dec_per_run = doc["pong"]["dec_per_run"].as<float>(); 
-      }
-      
-      num_pong_leds = doc["pong"]["num_leds"] | num_pong_leds;
-      pong_max_wins = doc["pong"]["max_wins"] | pong_max_wins;
-      pong_tolerance = doc["pong"]["tolerance"] | pong_tolerance;
-
-      if(doc["pong"]["result_delay_during"]){
-        pong_wins_delay_during = doc["pong"]["result_delay_during"].as<float>();
-      }
-
-      if(doc["pong"]["result_delay_after"]){
-        pong_wins_delay_after = doc["pong"]["result_delay_after"].as<float>();
-      }
-
-      pong_color_r = doc["pong"]["color_r"] | pong_color_r;
-      pong_color_g = doc["pong"]["color_g"] | pong_color_g;
-      pong_color_b = doc["pong"]["color_b"] | pong_color_b;
-
-      pong_result_color_r = doc["pong"]["result_color_r"] | pong_result_color_r;
-      pong_result_color_g = doc["pong"]["result_color_g"] | pong_result_color_g;
-      pong_result_color_b = doc["pong"]["result_color_b"] | pong_result_color_b;
-
-      color_r = doc["color_r"] | color_r;
-      color_g = doc["color_g"] | color_g;
-      color_b = doc["color_b"] | color_b;
+    } else if (String(topic) == topicId+"/pong/btn_delay"){
+      pong_btn_delay = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/init_delay"){
+      pong_init_delay = messageTemp.toFloat();
+    } else if (String(topic) == topicId+"/pong/min_delay"){
+      pong_min_delay = messageTemp.toFloat();
+    } else if (String(topic) == topicId+"/pong/dec_per_run"){
+      pong_dec_per_run = messageTemp.toFloat();
+    } else if (String(topic) == topicId+"/pong/num_leds"){
+      num_pong_leds = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/max_wins"){
+      pong_max_wins = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/result/delay/during"){
+      pong_wins_delay_during = messageTemp.toFloat();
+    } else if (String(topic) == topicId+"/pong/result/delay/after"){
+      pong_wins_delay_after = messageTemp.toFloat();
+    } else if (String(topic) == topicId+"/pong/result/color/r"){
+      pong_result_color_r = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/result/color/g"){
+      pong_result_color_g = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/result/color/b"){
+      pong_result_color_b = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/tolerance"){
+      pong_tolerance = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/color/r"){
+      pong_color_r = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/color/g"){
+      pong_color_g = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/pong/color/b"){
+      pong_color_b = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/color/r"){
+      color_r = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/color/g"){
+      color_g = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/color/b"){
+      color_b = messageTemp.toInt();
+    } else if (String(topic) == topicId+"/get_status"){
+      publish_current_status();
     }
-    
-  } else if (String(topic) == topicId+"/pong/btn_delay"){
-    pong_btn_delay = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/init_delay"){
-    pong_init_delay = messageTemp.toFloat();
-  } else if (String(topic) == topicId+"/pong/min_delay"){
-    pong_min_delay = messageTemp.toFloat();
-  } else if (String(topic) == topicId+"/pong/dec_per_run"){
-    pong_dec_per_run = messageTemp.toFloat();
-  } else if (String(topic) == topicId+"/pong/num_leds"){
-    num_pong_leds = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/max_wins"){
-    pong_max_wins = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/result/delay/during"){
-    pong_wins_delay_during = messageTemp.toFloat();
-  } else if (String(topic) == topicId+"/pong/result/delay/after"){
-    pong_wins_delay_after = messageTemp.toFloat();
-  } else if (String(topic) == topicId+"/pong/result/color/r"){
-    pong_result_color_r = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/result/color/g"){
-    pong_result_color_g = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/result/color/b"){
-    pong_result_color_b = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/tolerance"){
-    pong_tolerance = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/color/r"){
-    pong_color_r = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/color/g"){
-    pong_color_g = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/pong/color/b"){
-    pong_color_b = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/color/r"){
-    color_r = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/color/g"){
-    color_g = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/color/b"){
-    color_b = messageTemp.toInt();
-  } else if (String(topic) == topicId+"/get_status"){
-    publish_current_status();
-  }
-
-  fixConfigValues();
-
-  if ((String(topic) != topicId+"/output") &&
-      (String(topic) != topicId+"/get_status") &&
-      (stripe_mode == 0)){
-    if (stripe_on){
-      toggle_leds(1);
+  
+    fixConfigValues();
+  
+    if ((String(topic) != topicId+"/output") &&
+        (String(topic) != topicId+"/get_status") &&
+        (stripe_mode == 0)){
+      if (stripe_on){
+        toggle_leds(1);
+      } else {
+        toggle_leds(0);
+      }
+    }
+  
+    if(publish_status_after_every_config_change){
+      publish_current_status();
+    }
+  } else {
+    Serial.println("Button press via mqtt");
+    Serial.println(messageTemp);
+    if (messageTemp.toInt() == 2 ){
+      btn_two_last_pressed = millis();;
+      btn_two_state = 1;
     } else {
-      toggle_leds(0);
+      btn_one_last_pressed = millis();;
+      btn_one_state = 1;
     }
-  }
-
-  if(publish_status_after_every_config_change){
-    publish_current_status();
   }
 }
  
@@ -467,6 +480,7 @@ void reconnect() {
       client.subscribe((topicId+"/color/r").c_str());
       client.subscribe((topicId+"/color/g").c_str());
       client.subscribe((topicId+"/color/b").c_str());
+      client.subscribe((topicId+"/btn").c_str());
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
