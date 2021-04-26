@@ -616,9 +616,6 @@ void loop() {
           Serial.println("Switching to pong mode.");
           switch_to_pong_mode();
         } else {
-          Serial.println(btn_two_last_pressed);
-          Serial.println(btn_one_last_pressed);
-          Serial.println(pong_btn_delay);
           Serial.println("Toggling led stripe.");
           toggle_leds(-1);
         }
