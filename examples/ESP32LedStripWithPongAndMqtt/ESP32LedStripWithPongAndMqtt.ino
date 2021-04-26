@@ -58,6 +58,7 @@ int btn_one_state = 0;
 long btn_one_last_pressed = 0;
 int btn_two_state = 0;
 long btn_two_last_pressed = 0;
+int disable_hardware_btns = 0;
 
 
 int color_r = 255;
@@ -346,7 +347,23 @@ void callback(char* topic, byte* message, unsigned int length) {
       color_b = messageTemp.toInt();
     } else if (String(topic) == topicId+"/get_status"){
       publish_current_status();
-    }
+    } else if (String(topic) == topicId+"/disable_btns"){
+      if (messageTemp.toInt() == 1){
+        if (disable_hardware_btns != 1){
+          disable_hardware_btns = 1;
+          detachInterrupt(digitalPinToInterrupt(BTN_1_GPIO));
+          detachInterrupt(digitalPinToInterrupt(BTN_2_GPIO));
+          Serial.println("Disable Hardware Buttons");
+        }
+      } else {
+        if (disable_hardware_btns != 0){
+          disable_hardware_btns = 0;
+          attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, FALLING);
+          attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, FALLING);
+          Serial.println("Enable Hardware Buttons");
+        }
+      }
+    }    
   
     fixConfigValues();
   
@@ -494,6 +511,7 @@ void reconnect() {
       client.subscribe((topicId+"/color/g").c_str());
       client.subscribe((topicId+"/color/b").c_str());
       client.subscribe((topicId+"/btn").c_str());
+      client.subscribe((topicId+"/disable_btns").c_str());
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
