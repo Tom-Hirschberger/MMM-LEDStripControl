@@ -696,6 +696,10 @@ void loop() {
         }
         
         toggle_leds(0);
+        btn_two_state = 0;
+        btn_one_state = 0;
+        player_successfull_one_press = 0;
+        player_successfull_two_press = 0;
       } else {
         if (publish_results_at_display == 1){
           publish_results();
@@ -703,6 +707,10 @@ void loop() {
         display_result(pong_wins_delay_during);
         cur_pixel = 0;
         reverseMode = 0;
+        btn_two_state = 0;
+        btn_one_state = 0;
+        player_successfull_one_press = 0;
+        player_successfull_two_press = 0;
         cur_pong_delay = pong_init_delay;
       }
     }
