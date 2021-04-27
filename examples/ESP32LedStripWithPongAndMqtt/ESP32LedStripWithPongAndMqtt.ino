@@ -583,6 +583,7 @@ void reset_pong_vars(bool during, bool oneHitFirst){
     player_two_wins = 0;
     btn_one_last_pressed = 0;
     btn_two_last_pressed = 0;
+    stripe_mode = 0;
   }
 
   if (oneHitFirst){
@@ -722,7 +723,6 @@ void loop() {
       abortRun = 1;
       player_two_wins += 1;
       if(player_two_wins >= pong_max_wins){
-        stripe_mode = 0;
         if (publish_results_at_display == 1){
           publish_results();
         }
@@ -730,8 +730,7 @@ void loop() {
         reset_pong_vars(false, player_one_hit_first);
         if (publish_results_at_display == 1){
           publish_results();
-        }
-        
+        }  
         toggle_leds(0);
       } else {
         if (publish_results_at_display == 1){
@@ -768,7 +767,6 @@ void loop() {
       abortRun = 1;
       player_one_wins += 1;
       if(player_one_wins >= pong_max_wins){
-        stripe_mode = 0;
         if (publish_results_at_display == 1){
           publish_results();
         }
