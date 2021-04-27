@@ -137,6 +137,7 @@ If you like you can change some options:
 | showNormalColorOptions | Should the color options of the normal operating color be visible? | Boolean | true |
 | showPongColorOptions | Should the color options of the pong game be visible? | Boolean | true |
 | showPongOptions | Should the additional options of the pong game be visible? | Boolean | true |
+| showHardwareButtonOption | Should an option to disable the hardware buttons be visible? | Boolean | false |
 | fetchStatusInterval | The script sends a request to get the current configuration of the strip at the startup and in regular intervals. Normally the strip should send the configuration every time it gets switched on or off. If you do not plan to change the color values with an other module than this one you can set this value to a high one. The unit is seconds. | Integer | 300 |
 | outputOnIcon | You may like to change the icon of the output state to a different one. This one will be displayed if the strip is switched on. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-lightbulb-o" |
 | outputOffIcon | You may like to change the icon of the output state to a different one. This one will be displayed if the strip is switched off. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-lightbulb-o" |
@@ -144,6 +145,8 @@ If you like you can change some options:
 | upFastIcon | You may like to change the icon of the fast up symbol. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-angle-double-up" |
 | downIcon | You may like to change the icon of the down symbol. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-angle-down" |
 | downFastIcon | You may like to change the icon of fast down symbol. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-angle-double-down" |
+| hdwBtnEnabledIcon | You may like to change the icon which is displayed if the hardware buttons are enabled. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-link" |
+| hddwBtnDisabledIcon | You may like to change the icon which is displayed if the hardware buttons are disabled. Any free Font-Awesome 4.7 icon can be used. | String | "fa fa-chain-broken" |
 | instance | If you want to add more than one instance of this module please specify an instance number with this variable. All notifications will be suffixed with "_"+instance (i.e. "LED_STRIP_CONTROL_NEXT_ELEMENT_1") and each element gets an css class "lsc-"+instance. The instance with number 0 (default) will react to and sends notifications without suffix! | Integer | 0 |
 | instanceCssClass | All elements if this instance get this css class added. If you like to control the same strip but with two instances of the module (i.e. because you use the profile or pages module) you can leave the instance number as it is and only change the css stuff if you like (i.e. smaller module) | String | "lsc-"+instance (i.e. "lsc-0") |
 

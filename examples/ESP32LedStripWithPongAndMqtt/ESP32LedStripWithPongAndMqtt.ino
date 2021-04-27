@@ -58,7 +58,7 @@ int btn_one_state = 0;
 long btn_one_last_pressed = 0;
 int btn_two_state = 0;
 long btn_two_last_pressed = 0;
-int disable_hardware_btns = 0;
+bool enable_hardware_btns = true;
 
 
 int color_r = 255;
@@ -100,6 +100,7 @@ int publish_results_at_display = 1;
 
 
 void publish_current_status(){
+  Serial.println("Publishing current status");
   StaticJsonDocument<1024> doc;
   if (client.connected()){
      doc["pong"]["btn_delay"] = pong_btn_delay;
@@ -122,6 +123,7 @@ void publish_current_status(){
      doc["color_r"] = color_r;
      doc["color_g"] = color_g;
      doc["color_b"] = color_b;
+     doc["hardware_buttons_enabled"] = enable_hardware_btns;
 
      char buffer[1024];
 
@@ -269,9 +271,6 @@ void callback(char* topic, byte* message, unsigned int length) {
     } else if (String(topic) == topic_id+"/config"){
       StaticJsonDocument<1024> doc;
       DeserializationError err = deserializeJson(doc, messageTemp);
-      int cur_int_tmp_value = -1;
-      float cur_float_tmp_value = -1;
-      boolean cur_bool_tmp_value = false;
       if (!err){
   
         if(doc["pong"]["btn_delay"]){
@@ -313,6 +312,25 @@ void callback(char* topic, byte* message, unsigned int length) {
         color_r = doc["color_r"] | color_r;
         color_g = doc["color_g"] | color_g;
         color_b = doc["color_b"] | color_b;
+
+        if (doc.containsKey("hardware_buttons_enabled")){
+          if (!doc["hardware_buttons_enabled"]){
+            if (enable_hardware_btns){
+              enable_hardware_btns = false;
+              detachInterrupt(digitalPinToInterrupt(BTN_1_GPIO));
+              detachInterrupt(digitalPinToInterrupt(BTN_2_GPIO));
+              Serial.println("Disable Hardware Buttons");
+            }
+          } else {
+            if (!enable_hardware_btns){
+              enable_hardware_btns = true;
+              attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, FALLING);
+              attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, FALLING);
+              Serial.println("Enable Hardware Buttons");
+            }
+          }
+        }
+        
       }
       
     } else if (String(topic) == topic_id+"/pong/btn_delay"){
@@ -353,17 +371,17 @@ void callback(char* topic, byte* message, unsigned int length) {
       color_b = messageTemp.toInt();
     } else if (String(topic) == topic_id+"/get_status"){
       publish_current_status();
-    } else if (String(topic) == topic_id+"/disable_btns"){
+    } else if (String(topic) == topic_id+"/hardware_buttons_enabled"){
       if (messageTemp.toInt() == 1){
-        if (disable_hardware_btns != 1){
-          disable_hardware_btns = 1;
+        if (enable_hardware_btns){
+          enable_hardware_btns = false;
           detachInterrupt(digitalPinToInterrupt(BTN_1_GPIO));
           detachInterrupt(digitalPinToInterrupt(BTN_2_GPIO));
           Serial.println("Disable Hardware Buttons");
         }
       } else {
-        if (disable_hardware_btns != 0){
-          disable_hardware_btns = 0;
+        if (!enable_hardware_btns){
+          enable_hardware_btns = true;
           attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, FALLING);
           attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, FALLING);
           Serial.println("Enable Hardware Buttons");

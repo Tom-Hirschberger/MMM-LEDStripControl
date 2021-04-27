@@ -13,11 +13,11 @@ Module.register('MMM-LEDStripControl', {
     showNormalColorOptions: true,
     showPongColorOptions: true,
     showColorIndicators: true,
-    showHardwareBtnDisabler: false,
+    showHardwareButtonOption: false,
     outputOnIcon: "fa fa-lightbulb-o",
     outputOffIcon: "fa fa-lightbulb-o",
-    hdwBtnEnabledIcon: "fa fa-lock",
-    hdwBtnDisabledIcon: "fa fa-unlock",
+    hdwBtnEnabledIcon: "fa fa-link",
+    hdwBtnDisabledIcon: "fa fa-chain-broken",
     upIcon: "fa fa-angle-up",
     upFastIcon: "fa fa-angle-double-up",
     downIcon: "fa fa-angle-down",
@@ -230,24 +230,24 @@ Module.register('MMM-LEDStripControl', {
         wrapper.append(self.getOptionsDomObject("Pong Delay", pDelayOptionsElements, "lsc-pdelay"))
       }
 
-    if (self.config.showHardwareBtnDisabler){
+    if (self.config.showHardwareButtonOption){
       let hdwBtnWrapper = document.createElement('div')
-      hdwBtnWrapper.className = "lsc-hdwBtnWrapper "+self.instanceCssClass
+        hdwBtnWrapper.className = "lsc-hdwBtnWrapper "+self.instanceCssClass
         let hdwBtnIcon = document.createElement('i')
-        if(self.curValues["hdwBtn"].value == true){
-          hdwBtnIcon.className = self.config.hdwBtnEnabledIcon + " lsc-icon lsc-hdwBtn lsc-hdwBtn-disabled "+self.instanceCssClass
+        if(self.curValues["hardware_buttons_enabled"].value == true){
+          hdwBtnIcon.className = self.config.hdwBtnEnabledIcon + " lsc-icon lsc-hdwBtn lsc-hdwBtn-enabled "+self.instanceCssClass
         } else {
-          hdwBtnIcon.className = self.config.hdwBtnDisabledIcon + " lsc-icon lsc-hdwBtn lsc-hdwBtn-enabled "+self.instanceCssClass
+          hdwBtnIcon.className = self.config.hdwBtnDisabledIcon + " lsc-icon lsc-hdwBtn lsc-hdwBtn-disabled "+self.instanceCssClass
         }
 
-        if (self.curValues["hdwBtn"].selected == true){
+        if (self.curValues["hardware_buttons_enabled"].selected == true){
           hdwBtnIcon.className += " lsc-selected"
         } else {
           hdwBtnIcon.className += " lsc-unselected"
         }
-        self.curValues["hdwBtn"].obj = hdwBtnIcon
-        hdwBtnIcon.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"],{"element":"hdwBtn"})})
-        self.elements.push("hdwBtn")
+        self.curValues["hardware_buttons_enabled"].obj = hdwBtnIcon
+        hdwBtnIcon.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"],{"element":"hardware_buttons_enabled"})})
+        self.elements.push("hardware_buttons_enabled")
 
         hdwBtnWrapper.appendChild(hdwBtnIcon)
       wrapper.appendChild(hdwBtnWrapper)
@@ -266,7 +266,7 @@ Module.register('MMM-LEDStripControl', {
     self.curValues = {
       "output" : {"value":false, "selected": true, "obj" : null},
 
-      "hdwBtn" : {"value":false, "obj" : null},      
+      "hardware_buttons_enabled" : {"value":true, "obj" : null},      
 
       "color_r" : {"value":255, "step_u": 5, "step_d": 5, "step_u_f": 15, "step_d_f": 15, "min": 0, "max": 255, "selected": false, "obj" : null},
       "color_g" : {"value":255, "step_u": 5, "step_d": 5, "step_u_f": 15, "step_d_f": 15, "min": 0, "max": 255, "selected": false, "obj" : null},
@@ -441,15 +441,6 @@ Module.register('MMM-LEDStripControl', {
             self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "off")
           }
           
-        } else if (self.elements[self.selectedElement] === "hdwBtn"){
-          if(self.curValues[self.elements[self.selectedElement]].value == true){
-            console.log(self.name+": "+"Disable hdw buttons")
-            self.sendNotification(self.notifications["LED_STRIP_CONTROL_HDWBTN"], "1")
-          } else {
-            console.log(self.name+": "+"Enable hdw buttons")
-            self.sendNotification(self.notifications["LED_STRIP_CONTROL_HDWBTN"], "0")
-          }
-          
         } else {
           self.sendConfigurationNotification()
         }
@@ -503,16 +494,6 @@ Module.register('MMM-LEDStripControl', {
             console.log(self.name+": "+"Switch the lights off")
             self.sendNotification(self.notifications["LED_STRIP_CONTROL_OUTPUT"], "off")
           }
-          
-        } else if (self.elements[self.selectedElement] === "hdwBtn"){
-          if(self.curValues[self.elements[self.selectedElement]].value == true){
-            console.log(self.name+": "+"Disable hdw buttons")
-            self.sendNotification(self.notifications["LED_STRIP_CONTROL_HDWBTN"], "1")
-          } else {
-            console.log(self.name+": "+"Enable hdw buttons")
-            self.sendNotification(self.notifications["LED_STRIP_CONTROL_HDWBTN"], "0")
-          }
-          
         } else {
           self.sendConfigurationNotification()
         }
@@ -545,11 +526,15 @@ Module.register('MMM-LEDStripControl', {
         }
         
       } else {
-        if((curName !== "output") && (curName !== "hdwBtn")){
-          if (typeof self.curValues[curName].fractions !== "undefined"){
-            curConfigArray[curName] = Number.parseFloat(self.curValues[curName].value).toFixed(self.curValues[curName].fractions)
+        if(curName !== "output"){
+          if (typeof self.curValues[curName] === "number"){
+            if (typeof self.curValues[curName].fractions !== "undefined"){
+              curConfigArray[curName] = Number.parseFloat(self.curValues[curName].value).toFixed(self.curValues[curName].fractions)
+            } else {
+              curConfigArray[curName] = Number.parseInt(self.curValues[curName].value)
+            }
           } else {
-            curConfigArray[curName] = Number.parseInt(self.curValues[curName].value)
+            curConfigArray[curName] = self.curValues[curName].value
           }
         }
       }
