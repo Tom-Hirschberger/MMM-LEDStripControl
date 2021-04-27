@@ -17,7 +17,7 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 
-#define MAX_LEDS 300
+#define MAX_LEDS 300 //All leds will be switched off. But only NUM_LEDS will be used.
 #define NUM_LEDS 300
 #define NUM_PONG_LEDS 10
 #define DATA_PIN 14
@@ -38,11 +38,11 @@ CRGB leds[MAX_LEDS];
  
 const char* SSID = "ENTER_WIFI_SSID_HERE";
 const char* PSK = "ENTER_WIFI_PASSWORD_HERE";
-const char* MQTT_BROKER = "ENTER_MQTT_SERVER_ADDRESS_HERE";
-const char* MQTT_USER = "ENTER_MQTT_USERNAME_HERE";
-const char* MQTT_PASS = "ENTER_MQTT_PASSWORD_HERE";
-const String clientName = "ESP_LED";
-const String topicId = "esp_led";
+const char* mqtt_broker = "ENTER_MQTT_SERVER_ADDRESS_HERE";
+const char* mqtt_user = "ENTER_MQTT_USERNAME_HERE";
+const char* mqtt_pass = "ENTER_MQTT_PASSWORD_HERE";
+const String client_name = "ESP_LED";
+const String topic_id = "esp_led";
  
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -91,6 +91,7 @@ int player_one_miss = 0;
 int player_two_miss = 0;
 int abortRun = 0;
 bool player_one_hit_first = true;
+bool change_start_led_during_match = true;
 
 int publish_status_after_every_config_change = 1;
 int publish_status_if_toggled = 1;
@@ -125,7 +126,7 @@ void publish_current_status(){
      char buffer[1024];
 
      size_t n = serializeJson(doc, buffer);
-     client.publish((topicId+"/status").c_str(), buffer, n);
+     client.publish((topic_id+"/status").c_str(), buffer, n);
   }
 }
 
@@ -138,7 +139,7 @@ void publish_results(){
   char buffer[100];
 
   size_t n = serializeJson(doc, buffer);
-  client.publish((topicId+"/results").c_str(), buffer, n);
+  client.publish((topic_id+"/results").c_str(), buffer, n);
 }
 
 void fixConfigValues(){
@@ -158,8 +159,8 @@ void fixConfigValues(){
     pong_dec_per_run = 0;
   }
   
-  if (num_pong_leds > MAX_LEDS){
-    num_pong_leds = MAX_LEDS;
+  if (num_pong_leds > NUM_LEDS){
+    num_pong_leds = NUM_LEDS;
   }
   
   if (pong_max_wins > num_pong_leds){
@@ -249,10 +250,10 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
   Serial.println();
 
-  if (! (String(topic) == topicId+"/btn") ) {
+  if (! (String(topic) == topic_id+"/btn") ) {
     // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
     // Changes the output state according to the message
-    if (String(topic) == topicId+"/output") {
+    if (String(topic) == topic_id+"/output") {
       Serial.print("Changing output to ");
       if(messageTemp == "on"){
         Serial.println("on");
@@ -265,7 +266,7 @@ void callback(char* topic, byte* message, unsigned int length) {
         Serial.println("toggle");
         toggle_leds(-1);
       }
-    } else if (String(topic) == topicId+"/config"){
+    } else if (String(topic) == topic_id+"/config"){
       StaticJsonDocument<1024> doc;
       DeserializationError err = deserializeJson(doc, messageTemp);
       int cur_int_tmp_value = -1;
@@ -314,45 +315,45 @@ void callback(char* topic, byte* message, unsigned int length) {
         color_b = doc["color_b"] | color_b;
       }
       
-    } else if (String(topic) == topicId+"/pong/btn_delay"){
+    } else if (String(topic) == topic_id+"/pong/btn_delay"){
       pong_btn_delay = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/init_delay"){
+    } else if (String(topic) == topic_id+"/pong/init_delay"){
       pong_init_delay = messageTemp.toFloat();
-    } else if (String(topic) == topicId+"/pong/min_delay"){
+    } else if (String(topic) == topic_id+"/pong/min_delay"){
       pong_min_delay = messageTemp.toFloat();
-    } else if (String(topic) == topicId+"/pong/dec_per_run"){
+    } else if (String(topic) == topic_id+"/pong/dec_per_run"){
       pong_dec_per_run = messageTemp.toFloat();
-    } else if (String(topic) == topicId+"/pong/num_leds"){
+    } else if (String(topic) == topic_id+"/pong/num_leds"){
       num_pong_leds = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/max_wins"){
+    } else if (String(topic) == topic_id+"/pong/max_wins"){
       pong_max_wins = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/result/delay/during"){
+    } else if (String(topic) == topic_id+"/pong/result/delay/during"){
       pong_wins_delay_during = messageTemp.toFloat();
-    } else if (String(topic) == topicId+"/pong/result/delay/after"){
+    } else if (String(topic) == topic_id+"/pong/result/delay/after"){
       pong_wins_delay_after = messageTemp.toFloat();
-    } else if (String(topic) == topicId+"/pong/result/color/r"){
+    } else if (String(topic) == topic_id+"/pong/result/color/r"){
       pong_result_color_r = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/result/color/g"){
+    } else if (String(topic) == topic_id+"/pong/result/color/g"){
       pong_result_color_g = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/result/color/b"){
+    } else if (String(topic) == topic_id+"/pong/result/color/b"){
       pong_result_color_b = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/tolerance"){
+    } else if (String(topic) == topic_id+"/pong/tolerance"){
       pong_tolerance = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/color/r"){
+    } else if (String(topic) == topic_id+"/pong/color/r"){
       pong_color_r = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/color/g"){
+    } else if (String(topic) == topic_id+"/pong/color/g"){
       pong_color_g = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/pong/color/b"){
+    } else if (String(topic) == topic_id+"/pong/color/b"){
       pong_color_b = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/color/r"){
+    } else if (String(topic) == topic_id+"/color/r"){
       color_r = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/color/g"){
+    } else if (String(topic) == topic_id+"/color/g"){
       color_g = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/color/b"){
+    } else if (String(topic) == topic_id+"/color/b"){
       color_b = messageTemp.toInt();
-    } else if (String(topic) == topicId+"/get_status"){
+    } else if (String(topic) == topic_id+"/get_status"){
       publish_current_status();
-    } else if (String(topic) == topicId+"/disable_btns"){
+    } else if (String(topic) == topic_id+"/disable_btns"){
       if (messageTemp.toInt() == 1){
         if (disable_hardware_btns != 1){
           disable_hardware_btns = 1;
@@ -372,8 +373,8 @@ void callback(char* topic, byte* message, unsigned int length) {
   
     fixConfigValues();
   
-    if ((String(topic) != topicId+"/output") &&
-        (String(topic) != topicId+"/get_status") &&
+    if ((String(topic) != topic_id+"/output") &&
+        (String(topic) != topic_id+"/get_status") &&
         (stripe_mode == 0)){
       if (stripe_on){
         toggle_leds(1);
@@ -402,7 +403,7 @@ void setup() {
     client.setBufferSize(512);
     Serial.begin(115200);
     setup_wifi();
-    client.setServer(MQTT_BROKER, 1883);
+    client.setServer(mqtt_broker, 1883);
     reconnect();
     client.setCallback(callback);
 
@@ -417,7 +418,7 @@ void setup() {
     FastLED.show();
     FastLED.show();
     delay(50);
-    for (int i=0; i < MAX_LEDS; i++){
+    for (int i=0; i < NUM_LEDS; i++){
       leds[i] = CRGB::White;
     }
     FastLED.show();
@@ -489,34 +490,34 @@ void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect(clientName.c_str(), MQTT_USER, MQTT_PASS)) {
+    if (client.connect(client_name.c_str(), mqtt_user, mqtt_pass)) {
       Serial.println("connected");
       // Subscribe
-      Serial.print("Subscribing with topicId: ");
-      Serial.println(topicId);
-      client.subscribe((topicId+"/get_status").c_str());
-      client.subscribe((topicId+"/config").c_str());
-      client.subscribe((topicId+"/output").c_str());
-      client.subscribe((topicId+"/pong/btn_delay").c_str());
-      client.subscribe((topicId+"/pong/init_delay").c_str());
-      client.subscribe((topicId+"/pong/min_delay").c_str());
-      client.subscribe((topicId+"/pong/dec_per_run").c_str());
-      client.subscribe((topicId+"/pong/num_leds").c_str());
-      client.subscribe((topicId+"/pong/max_wins").c_str());
-      client.subscribe((topicId+"/pong/result/delay/during").c_str());
-      client.subscribe((topicId+"/pong/result/delay/after").c_str());
-      client.subscribe((topicId+"/pong/result/color/r").c_str());
-      client.subscribe((topicId+"/pong/result/color/g").c_str());
-      client.subscribe((topicId+"/pong/result/color/b").c_str());
-      client.subscribe((topicId+"/pong/tolerance").c_str());
-      client.subscribe((topicId+"/pong/color/r").c_str());
-      client.subscribe((topicId+"/pong/color/g").c_str());
-      client.subscribe((topicId+"/pong/color/b").c_str());
-      client.subscribe((topicId+"/color/r").c_str());
-      client.subscribe((topicId+"/color/g").c_str());
-      client.subscribe((topicId+"/color/b").c_str());
-      client.subscribe((topicId+"/btn").c_str());
-      client.subscribe((topicId+"/disable_btns").c_str());
+      Serial.print("Subscribing with topic_id: ");
+      Serial.println(topic_id);
+      client.subscribe((topic_id+"/get_status").c_str());
+      client.subscribe((topic_id+"/config").c_str());
+      client.subscribe((topic_id+"/output").c_str());
+      client.subscribe((topic_id+"/pong/btn_delay").c_str());
+      client.subscribe((topic_id+"/pong/init_delay").c_str());
+      client.subscribe((topic_id+"/pong/min_delay").c_str());
+      client.subscribe((topic_id+"/pong/dec_per_run").c_str());
+      client.subscribe((topic_id+"/pong/num_leds").c_str());
+      client.subscribe((topic_id+"/pong/max_wins").c_str());
+      client.subscribe((topic_id+"/pong/result/delay/during").c_str());
+      client.subscribe((topic_id+"/pong/result/delay/after").c_str());
+      client.subscribe((topic_id+"/pong/result/color/r").c_str());
+      client.subscribe((topic_id+"/pong/result/color/g").c_str());
+      client.subscribe((topic_id+"/pong/result/color/b").c_str());
+      client.subscribe((topic_id+"/pong/tolerance").c_str());
+      client.subscribe((topic_id+"/pong/color/r").c_str());
+      client.subscribe((topic_id+"/pong/color/g").c_str());
+      client.subscribe((topic_id+"/pong/color/b").c_str());
+      client.subscribe((topic_id+"/color/r").c_str());
+      client.subscribe((topic_id+"/color/g").c_str());
+      client.subscribe((topic_id+"/color/b").c_str());
+      client.subscribe((topic_id+"/btn").c_str());
+      client.subscribe((topic_id+"/disable_btns").c_str());
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -549,7 +550,7 @@ void toggle_leds(int to_state){
     }
     stripe_on = true;
   } else {
-    for (int i = 0; i< NUM_LEDS; i++){
+    for (int i = 0; i< MAX_LEDS; i++){
       leds[i] = CRGB::Black;
     }
     stripe_on = false;
@@ -579,7 +580,9 @@ void reset_pong_vars(bool during, bool oneHitFirst){
 
   if (!during){
     player_one_wins = 0;
-    player_two_wins = 0;  
+    player_two_wins = 0;
+    btn_one_last_pressed = 0;
+    btn_two_last_pressed = 0;
   }
 
   if (oneHitFirst){
@@ -597,7 +600,7 @@ void switch_to_pong_mode(bool oneHitFirst){
 
   stripe_mode = 1;
 
-  for (int i = 0; i< NUM_LEDS; i++){
+  for (int i = 0; i< MAX_LEDS; i++){
       leds[i] = CRGB::Black;
   }
   FastLED.show();
@@ -611,7 +614,7 @@ void switch_to_pong_mode(bool oneHitFirst){
   FastLED.show();
   FastLED.show();
   delay(1000);
-  for (int i = 0; i< NUM_LEDS; i++){
+  for (int i = 0; i< MAX_LEDS; i++){
       leds[i] = CRGB::Black;
   }
   FastLED.show();
@@ -622,7 +625,7 @@ void switch_to_pong_mode(bool oneHitFirst){
 void display_result(float cur_delay){
   Serial.println("Displaying results");
   delay(500);
-  for (int i = 0; i< NUM_LEDS; i++){
+  for (int i = 0; i< MAX_LEDS; i++){
       leds[i] = CRGB::Black;
   }
 
@@ -737,6 +740,9 @@ void loop() {
         display_result(pong_wins_delay_during);
         cur_pixel = 0;
         reverseMode = 0;
+        if (change_start_led_during_match){
+          player_one_hit_first = !player_one_hit_first;
+        }
         reset_pong_vars(true, player_one_hit_first);
       }
     }
@@ -777,6 +783,9 @@ void loop() {
           publish_results();
         }
         display_result(pong_wins_delay_during);
+        if (change_start_led_during_match){
+          player_one_hit_first = !player_one_hit_first;
+        }
         reset_pong_vars(true, player_one_hit_first);
       }
     }
