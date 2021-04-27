@@ -87,11 +87,16 @@ int player_one_wins = 0;
 int player_successfull_one_press = 0;
 int player_two_wins = 0;
 int player_successfull_two_press = 0;
+int player_one_miss = 0;
+int player_two_miss = 0;
+int abortRun = 0;
+bool player_one_hit_first = true;
 
 int publish_status_after_every_config_change = 1;
 int publish_status_if_toggled = 1;
 int publish_status_at_start = 1;
 int publish_results_at_display = 1;
+
 
 void publish_current_status(){
   StaticJsonDocument<1024> doc;
@@ -557,17 +562,38 @@ void toggle_leds(int to_state){
   }
 }
 
-void reset_pong_vars(){
+void reset_pong_vars(bool during, bool oneHitFirst){
+  Serial.print("Resetting pong vars (");
+  Serial.print(during);
+  Serial.print("/");
+  Serial.print(oneHitFirst);
+  Serial.println(")");
+  client.loop();
+  player_one_miss = 0;
+  player_two_miss = 0;
   btn_one_state = 0;
   btn_two_state = 0;
-  player_one_wins = 0;
-  player_two_wins = 0;
-  cur_pixel = 0;
+  player_successfull_one_press = 0;
+  player_successfull_two_press = 0;
   cur_pong_delay = pong_init_delay;
+
+  if (!during){
+    player_one_wins = 0;
+    player_two_wins = 0;  
+  }
+
+  if (oneHitFirst){
+    cur_pixel = 0;
+    reverseMode = 0;
+  } else {
+    cur_pixel = num_pong_leds-1;
+    reverseMode = 1;
+  }
 }
 
-void switch_to_pong_mode(){
-  reset_pong_vars();
+void switch_to_pong_mode(bool oneHitFirst){
+  Serial.println("Switching to pong mode");
+  reset_pong_vars(false, oneHitFirst);
 
   stripe_mode = 1;
 
@@ -594,6 +620,7 @@ void switch_to_pong_mode(){
 }
 
 void display_result(float cur_delay){
+  Serial.println("Displaying results");
   delay(500);
   for (int i = 0; i< NUM_LEDS; i++){
       leds[i] = CRGB::Black;
@@ -628,11 +655,12 @@ void loop() {
   if (stripe_mode == 0){
     if ((btn_one_state == 1) or (btn_two_state == 1)){
       if (btn_two_state == 1){
+        player_one_hit_first = true;
         btn_two_state = 0;
         Serial.println("Button two pressed.");
         if ((btn_two_last_pressed - btn_one_last_pressed) < (pong_btn_delay*1000)){
           Serial.println("Switching to pong mode.");
-          switch_to_pong_mode();
+          switch_to_pong_mode(player_one_hit_first);
         } else {
           Serial.println("Toggling led stripe.");
           toggle_leds(-1);
@@ -640,9 +668,15 @@ void loop() {
       }
   
       if (btn_one_state == 1){
+        player_one_hit_first = false;
         btn_one_state = 0;
-        Serial.println("Button one pressed. Toggling led stripe.");
-        toggle_leds(-1);
+        if ((btn_one_last_pressed - btn_two_last_pressed) < (pong_btn_delay*1000)){
+          Serial.println("Switching to pong mode.");
+          switch_to_pong_mode(player_one_hit_first);
+        } else {
+          Serial.println("Button one pressed. Toggling led stripe.");
+          toggle_leds(-1);
+        }
       }
     } else {
       if((millis() - last_refresh) > REFRESH_INTERVAL){
@@ -662,9 +696,9 @@ void loop() {
     FastLED.show(); 
 
     delay(cur_pong_delay*1000);
-    
-    int abortRun = 0;
-    int player_one_miss = 0;
+
+    abortRun = 0;
+    player_one_miss = 0;
 
     if (player_successfull_one_press == 0){
       if(btn_one_state == 1){
@@ -690,16 +724,12 @@ void loop() {
           publish_results();
         }
         display_result(pong_wins_delay_after);
+        reset_pong_vars(false, player_one_hit_first);
         if (publish_results_at_display == 1){
-          reset_pong_vars();
           publish_results();
         }
         
         toggle_leds(0);
-        btn_two_state = 0;
-        btn_one_state = 0;
-        player_successfull_one_press = 0;
-        player_successfull_two_press = 0;
       } else {
         if (publish_results_at_display == 1){
           publish_results();
@@ -707,15 +737,11 @@ void loop() {
         display_result(pong_wins_delay_during);
         cur_pixel = 0;
         reverseMode = 0;
-        btn_two_state = 0;
-        btn_one_state = 0;
-        player_successfull_one_press = 0;
-        player_successfull_two_press = 0;
-        cur_pong_delay = pong_init_delay;
+        reset_pong_vars(true, player_one_hit_first);
       }
     }
     
-    int player_two_miss = 0;
+    player_two_miss = 0;
 
     if (player_successfull_two_press == 0){
       if(btn_two_state == 1){
@@ -741,27 +767,17 @@ void loop() {
           publish_results();
         }
         display_result(pong_wins_delay_after);
+        reset_pong_vars(false, player_one_hit_first);
         if (publish_results_at_display == 1){
-          reset_pong_vars();
           publish_results();
         }
         toggle_leds(0);
-        btn_two_state = 0;
-        btn_one_state = 0;
-        player_successfull_one_press = 0;
-        player_successfull_two_press = 0;
       } else {
         if (publish_results_at_display == 1){
           publish_results();
         }
         display_result(pong_wins_delay_during);
-        cur_pixel = 0;
-        reverseMode = 0;
-        btn_two_state = 0;
-        btn_one_state = 0;
-        player_successfull_one_press = 0;
-        player_successfull_two_press = 0;
-        cur_pong_delay = pong_init_delay;
+        reset_pong_vars(true, player_one_hit_first);
       }
     }
 
