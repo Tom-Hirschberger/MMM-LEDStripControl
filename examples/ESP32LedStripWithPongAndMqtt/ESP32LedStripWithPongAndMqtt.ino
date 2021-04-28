@@ -61,6 +61,7 @@ long btn_two_last_pressed = 0;
 bool enable_hardware_btns = true;
 
 
+int brightness = 255;
 int color_r = 255;
 int color_g = 255;
 int color_b = 255;
@@ -120,6 +121,7 @@ void publish_current_status(){
      doc["pong"]["result_color_b"] = pong_result_color_b;
      doc["output"] = stripe_on;
      doc["mode"] = stripe_mode;
+     doc["brightness"] = brightness;
      doc["color_r"] = color_r;
      doc["color_g"] = color_g;
      doc["color_b"] = color_b;
@@ -238,6 +240,12 @@ void fixConfigValues(){
   } else if (color_b < 0){
     color_b = 0;
   }
+
+  if (brightness > 255){
+    brightness = 255;
+  } else if (brightness < 0){
+    brightness = 0;
+  }
 }
 
 void callback(char* topic, byte* message, unsigned int length) {
@@ -313,6 +321,8 @@ void callback(char* topic, byte* message, unsigned int length) {
         color_g = doc["color_g"] | color_g;
         color_b = doc["color_b"] | color_b;
 
+        brightness = doc["brightness"] | brightness;
+
         if (doc.containsKey("hardware_buttons_enabled")){
           if (!doc["hardware_buttons_enabled"]){
             if (enable_hardware_btns){
@@ -369,6 +379,8 @@ void callback(char* topic, byte* message, unsigned int length) {
       color_g = messageTemp.toInt();
     } else if (String(topic) == topic_id+"/color/b"){
       color_b = messageTemp.toInt();
+    } else if (String(topic) == topic_id+"/brightness"){
+      brightness = messageTemp.toInt();
     } else if (String(topic) == topic_id+"/get_status"){
       publish_current_status();
     } else if (String(topic) == topic_id+"/hardware_buttons_enabled"){
@@ -416,6 +428,12 @@ void callback(char* topic, byte* message, unsigned int length) {
     }
   }
 }
+
+void show(){
+  FastLED.setBrightness(brightness);
+  FastLED.show();
+  FastLED.show();
+}
  
 void setup() {
     client.setBufferSize(512);
@@ -433,20 +451,17 @@ void setup() {
     for (int i=0; i < MAX_LEDS; i++){
       leds[i] = CRGB::Black;
     }
-    FastLED.show();
-    FastLED.show();
+    show();
     delay(50);
     for (int i=0; i < NUM_LEDS; i++){
       leds[i] = CRGB::White;
     }
-    FastLED.show();
-    FastLED.show();
+    show();
     delay(200);
     for (int i=0; i < MAX_LEDS; i++){
       leds[i] = CRGB::Black;
     }
-    FastLED.show();
-    FastLED.show();
+    show();
 
     pinMode(BTN_1_GPIO, INPUT);
     pinMode(BTN_2_GPIO, INPUT);
@@ -574,8 +589,7 @@ void toggle_leds(int to_state){
     stripe_on = false;
   }
 
-  FastLED.show();
-  FastLED.show();
+  show();
   if (publish_status_if_toggled == 1){
     publish_current_status();
   }
@@ -622,22 +636,19 @@ void switch_to_pong_mode(bool oneHitFirst){
   for (int i = 0; i< MAX_LEDS; i++){
       leds[i] = CRGB::Black;
   }
-  FastLED.show();
-  FastLED.show();
+  show();
   delay(1000);
   for (int i = 0; i< num_pong_leds; i++){
       leds[i].r = pong_color_r;
       leds[i].g = pong_color_g;
       leds[i].b = pong_color_b;
   }
-  FastLED.show();
-  FastLED.show();
+  show();
   delay(1000);
   for (int i = 0; i< MAX_LEDS; i++){
       leds[i] = CRGB::Black;
   }
-  FastLED.show();
-  FastLED.show();
+  show();
   delay(1000);
 }
 
@@ -659,8 +670,7 @@ void display_result(float cur_delay){
     leds[i].g = pong_result_color_g;
     leds[i].b = pong_result_color_b;
   }
-  FastLED.show();
-  FastLED.show();
+  show();
   delay(cur_delay*1000);
 }
 
@@ -702,8 +712,7 @@ void loop() {
       }
     } else {
       if((millis() - last_refresh) > REFRESH_INTERVAL){
-        FastLED.show();
-        FastLED.show(); 
+        show();
       }
     }
   } else if (stripe_mode == 1){
@@ -713,9 +722,8 @@ void loop() {
 
     leds[cur_pixel].r = pong_color_r;
     leds[cur_pixel].g = pong_color_g;
-    leds[cur_pixel].b = pong_color_b; 
-    FastLED.show();
-    FastLED.show(); 
+    leds[cur_pixel].b = pong_color_b;
+    show();
 
     delay(cur_pong_delay*1000);
 
