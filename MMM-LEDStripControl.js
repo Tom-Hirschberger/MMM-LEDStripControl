@@ -14,14 +14,20 @@ Module.register('MMM-LEDStripControl', {
     showPongColorOptions: true,
     showColorIndicators: true,
     showHardwareButtonOption: false,
+    showBrightnessOption: false,
     outputOnIcon: "fa fa-lightbulb-o",
     outputOffIcon: "fa fa-lightbulb-o",
     hdwBtnEnabledIcon: "fa fa-link",
     hdwBtnDisabledIcon: "fa fa-chain-broken",
     upIcon: "fa fa-angle-up",
     upFastIcon: "fa fa-angle-double-up",
+    leftIcon: "fa fa-angle-left",
+    leftFastIcon: "fa fa-angle-double-left",
     downIcon: "fa fa-angle-down",
     downFastIcon: "fa fa-angle-double-down",
+    rightIcon: "fa fa-angle-right",
+    rightFastIcon: "fa fa-angle-double-right",
+    horizontalOptions: false,
     fetchStatusInterval: 300,
     instance: 0,
     instanceCssClass: null
@@ -103,6 +109,53 @@ Module.register('MMM-LEDStripControl', {
     return wrapper
   },
 
+  getLeftRightElement: function(key, cssClassPart){
+    const self = this
+    let wrapper = document.createElement('div')
+      wrapper.className="lsc-left-right-wrapper "+cssClassPart
+
+      let fastLeft = document.createElement('i')
+        fastLeft.className = self.config.leftFastIcon+" lsc-icon lsc-fastLeft "+cssClassPart
+        fastLeft.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_DECREASE_VALUE"],{"element":key,"step":self.curValues[key].step_d_f})})
+      wrapper.appendChild(fastLeft)
+
+      let left = document.createElement('i')
+        left.className = self.config.leftIcon+" lsc-icon lsc-left "+cssClassPart
+        left.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_DECREASE_VALUE"],{"element":key,"step":self.curValues[key].step_d})})
+      wrapper.appendChild(left)
+
+      let value = document.createElement('div')
+        value.className = "lsc-value "+cssClassPart
+
+        if (self.curValues[key].selected == true){
+          value.className += " lsc-selected"
+        } else {
+          value.className += " lsc-unselected"
+        }
+
+      self.curValues[key].obj = value
+      self.elements.push(key)
+      if (typeof self.curValues[key].fractions !== "undefined"){
+        value.innerHTML = Number.parseFloat(self.curValues[key].value).toFixed(self.curValues[key].fractions)
+      } else {
+        value.innerHTML = self.curValues[key].value
+      }
+      
+      wrapper.appendChild(value)
+
+      let right = document.createElement('i')
+        right.className = self.config.rightIcon+" lsc-icon lsc-right "+cssClassPart
+        right.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"],{"element":key,"step":self.curValues[key].step_u})})
+      wrapper.appendChild(right)
+
+      let fastRight = document.createElement('i')
+        fastRight.className = self.config.rightFastIcon+" lsc-icon lsc-fastRight "+cssClassPart
+        fastRight.addEventListener("click", ()=>{self.notificationReceived(self.notifications["LED_STRIP_CONTROL_INCREASE_VALUE"],{"element":key,"step":self.curValues[key].step_u_f})})
+      wrapper.appendChild(fastRight)
+
+    return wrapper
+  },
+
   getColorDomObject: function(keyPrefix, header, cssClassPart){
     const self = this
     let colorWrapper = document.createElement('div')
@@ -121,6 +174,7 @@ Module.register('MMM-LEDStripControl', {
 
       let colorOuterWrapper = document.createElement('div')
         colorOuterWrapper.className = "lsc-colorOuterWrapper "+cssClassPart
+
         //color red
         colorOuterWrapper.appendChild(self.getUpDownElement(keyPrefix+"_r", cssClassPart+"-red"))
 
@@ -194,6 +248,19 @@ Module.register('MMM-LEDStripControl', {
         outputWrapper.appendChild(outputIcon)
       wrapper.appendChild(outputWrapper)
 
+      if (self.config.showBrightnessOption){
+        let brightnessWrapper = document.createElement('div')
+          brightnessWrapper.className = "lsc-brightnessWrapper "+self.instanceCssClass
+          let brightnessInnerWrapper = document.createElement('div')
+            brightnessInnerWrapper.className = "lsc-brightnessInnerWrapper "+self.instanceCssClass
+            let brightness = self.getLeftRightElement("brightness", self.instanceCssClass+" lsc-brightness")
+            self.curValues["brightness"].obj = brightness
+            self.elements.push("brightness")
+          brightnessInnerWrapper.appendChild(brightness)
+          brightnessWrapper.appendChild(brightnessInnerWrapper)
+        wrapper.appendChild(brightnessWrapper)
+      }
+
       if (self.config.showNormalColorOptions){
         wrapper.appendChild(self.getColorDomObject("color", "Color", self.instanceCssClass+" lsc-ncolor"))
       }
@@ -265,6 +332,8 @@ Module.register('MMM-LEDStripControl', {
 
     self.curValues = {
       "output" : {"value":false, "selected": true, "obj" : null},
+
+      "brightness" : {"value":255, "step_u": 5, "step_d": 5, "step_u_f": 15, "step_d_f": 15, "min": 0, "max": 255, "selected": false, "obj" : null},
 
       "hardware_buttons_enabled" : {"value":true, "obj" : null},      
 

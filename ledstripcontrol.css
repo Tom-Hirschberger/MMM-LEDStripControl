@@ -41,6 +41,12 @@
     align-items: center;
 }
 
+.lsc-left-right-wrapper {
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .lsc-colorIndicator {
     border-radius: 5px;
     min-height: 20px;
@@ -65,8 +71,14 @@
     border-radius: 5px;
 }
 
-.lsc-outputWrapper {
+.lsc-outputWrapper, .lsc-brightnessWrapper {
     width: 100%;
+}
+
+.lsc-brightnessWrapper {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .lsc-output-on {
