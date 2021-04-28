@@ -88,3 +88,9 @@
 .lsc-output-off {
     color: rgb(99, 95, 48);
 }
+
+.lsc-left, .lsc-fastLeft, .lsc-right, .lsc-fastRight {
+    min-width: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
