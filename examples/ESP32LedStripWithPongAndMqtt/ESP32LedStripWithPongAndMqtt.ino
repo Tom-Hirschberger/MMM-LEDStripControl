@@ -35,7 +35,7 @@
 #define REFRESH_INTERVAL 10000
 
 CRGB leds[MAX_LEDS];
- 
+
 const char* SSID = "ENTER_WIFI_SSID_HERE";
 const char* PSK = "ENTER_WIFI_PASSWORD_HERE";
 const char* mqtt_broker = "ENTER_MQTT_SERVER_ADDRESS_HERE";
@@ -629,6 +629,7 @@ void reset_pong_vars(bool during, bool oneHitFirst){
 
 void switch_to_pong_mode(bool oneHitFirst){
   Serial.println("Switching to pong mode");
+  delay(500);
   reset_pong_vars(false, oneHitFirst);
 
   stripe_mode = 1;
