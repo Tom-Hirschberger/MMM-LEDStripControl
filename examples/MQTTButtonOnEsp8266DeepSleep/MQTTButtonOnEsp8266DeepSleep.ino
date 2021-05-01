@@ -13,7 +13,6 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-int btn_pin = 2;
 bool btn_state = false;
 long btn_last_pressed = 0;
 long last_action = 0;

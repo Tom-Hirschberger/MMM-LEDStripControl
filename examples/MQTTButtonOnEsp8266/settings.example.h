@@ -13,3 +13,5 @@ const String targetMsg = "1";
 const String clientName = "ESP_BTN"+targetMsg;
 const String targetBtnId = targetId+"/btn";
 const String targetResultId = targetId+"/results";
+
+int btn_pin = 2;

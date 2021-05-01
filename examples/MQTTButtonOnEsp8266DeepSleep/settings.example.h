@@ -17,3 +17,4 @@ const String targetId = "raspled";
 const String targetBtnId = targetId+"/btn";
 const String targetResultId = targetId+"/results";
 
+int btn_pin = 2;
