@@ -31,13 +31,18 @@ long last_refresh = 0;
 int reverseMode=0;
 int cur_pixel=0;
 int btn_one_state = 0;
+int btn_one_long_state = 0;
 long btn_one_last_pressed = 0;
+long btn_one_last_released = -1;
 int btn_two_state = 0;
+int btn_two_long_state = 0;
 long btn_two_last_pressed = 0;
+long btn_two_last_released = -1;
 bool enable_hardware_btns = true;
 
 
 int brightness = 255;
+int brightness_decrease = true;
 int color_r = 255;
 int color_g = 255;
 int color_b = 255;
@@ -310,8 +315,8 @@ void callback(char* topic, byte* message, unsigned int length) {
           } else {
             if (!enable_hardware_btns){
               enable_hardware_btns = true;
-              attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, FALLING);
-              attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, FALLING);
+              attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_changed, CHANGE);
+              attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_changed, CHANGE);
               Serial.println("Enable Hardware Buttons");
             }
           }
@@ -370,8 +375,8 @@ void callback(char* topic, byte* message, unsigned int length) {
       } else {
         if (!enable_hardware_btns){
           enable_hardware_btns = true;
-          attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, FALLING);
-          attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, FALLING);
+          attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_changed, CHANGE);
+          attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_changed, CHANGE);
           Serial.println("Enable Hardware Buttons");
         }
       }
@@ -443,8 +448,8 @@ void setup() {
     pinMode(BTN_2_GPIO, INPUT);
     pinMode(DATA_PIN, OUTPUT);
 
-    attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_pressed, FALLING);
-    attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_pressed, FALLING);    
+    attachInterrupt(digitalPinToInterrupt(BTN_1_GPIO), btn_one_changed, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(BTN_2_GPIO), btn_two_changed, CHANGE);
     delay(500);
 }
  
@@ -478,19 +483,35 @@ void setup_wifi() {
     Serial.println(WiFi.localIP());
 }
 
-void btn_one_pressed(){
+void btn_one_changed(){
   long cur_time = millis();
   if((cur_time - btn_one_last_pressed) > BTN_DEBOUNCE_DELAY){
-    btn_one_last_pressed = cur_time;
-    btn_one_state = 1;
+    if (digitalRead(BTN_1_GPIO) == LOW){
+      btn_one_last_pressed = cur_time;
+      btn_one_state = 1;  
+    } else{
+      btn_one_last_released = cur_time;
+    }
+  } else{
+    if (digitalRead(BTN_1_GPIO) == HIGH){
+      btn_one_last_released = cur_time;
+    }
   }
 }
 
-void btn_two_pressed(){
+void btn_two_changed(){
   long cur_time = millis();
   if((cur_time - btn_two_last_pressed) > BTN_DEBOUNCE_DELAY){
-    btn_two_last_pressed = cur_time;
-    btn_two_state = 1;
+    if (digitalRead(BTN_2_GPIO) == LOW){
+      btn_two_last_pressed = cur_time;
+      btn_two_state = 1;  
+    } else{
+      btn_two_last_released = cur_time;
+    }
+  } else {
+    if (digitalRead(BTN_2_GPIO) == HIGH){
+      btn_two_last_released = cur_time;
+    }
   }
 }
  
@@ -651,6 +672,28 @@ void display_result(float cur_delay){
   delay(cur_delay*1000);
 }
 
+void changeBrightness(){
+  if (brightness_decrease){
+    //Serial.println("Decrease brightness");
+    brightness = brightness - BRIGHTNESS_CHANGE_VALUE;
+    if (brightness <= 0){
+      brightness = 0;
+      //Serial.println("Smallest value reached");
+      brightness_decrease = !brightness_decrease;
+    }
+  } else {
+    //Serial.println("Increase brightness");
+    brightness = brightness + BRIGHTNESS_CHANGE_VALUE;
+    if (brightness >= 255){
+      brightness = 255;
+      //Serial.println("Max value reached");
+      brightness_decrease = !brightness_decrease;
+    }
+  }
+
+  show();
+}
+
 void loop() {
   if (WiFi.status() != WL_CONNECTED) {
       setup_wifi();
@@ -663,28 +706,79 @@ void loop() {
   
   if (stripe_mode == 0){
     if ((btn_one_state == 1) or (btn_two_state == 1)){
+      //Serial.println("btn one or two pressed");
       if (btn_two_state == 1){
-        player_one_hit_first = true;
-        btn_two_state = 0;
-        Serial.println("Button two pressed.");
-        if ((btn_two_last_pressed - btn_one_last_pressed) < (pong_btn_delay*1000)){
-          Serial.println("Switching to pong mode.");
-          switch_to_pong_mode(player_one_hit_first);
+        //Serial.println("btn_two_state == 1");
+        //Serial.println(btn_two_last_released);
+        //Serial.println(btn_two_last_pressed);
+        if ((btn_two_last_released >= btn_two_last_pressed) or (!stripe_on)){
+          //Serial.println("btn_two currently is not pressed");
+          if (btn_two_long_state == 0){
+            //Serial.println("btn_two had no long press");
+            player_one_hit_first = true;
+            btn_two_state = 0;
+            //Serial.println("Button two pressed.");
+            if ((btn_two_last_pressed - btn_one_last_pressed) < (pong_btn_delay*1000)){
+              Serial.println("Switching to pong mode.");
+              switch_to_pong_mode(player_one_hit_first);
+            } else {
+              Serial.println("Toggling led stripe.");
+              toggle_leds(-1);
+            }
+          } else {
+            //Serial.println("btn_two had long press");
+            btn_two_long_state = 0;
+            btn_two_state = 0;
+          }
         } else {
-          Serial.println("Toggling led stripe.");
-          toggle_leds(-1);
+          //button still pressed. Maybe a long press?
+          if ((millis() - btn_two_last_pressed) > BTN_LONG_PRESS_DELAY){
+            //Serial.println("btn_two long press detected");
+            btn_two_long_state = 1;
+            changeBrightness();
+            publish_current_status();
+            delay(BRIGHTNESS_CHANGE_INTERVAL);
+          } else {
+            //Serial.println("btn_two still pressed");
+            delay(BRIGHTNESS_CHANGE_INTERVAL);
+          }
         }
       }
   
       if (btn_one_state == 1){
-        player_one_hit_first = false;
-        btn_one_state = 0;
-        if ((btn_one_last_pressed - btn_two_last_pressed) < (pong_btn_delay*1000)){
-          Serial.println("Switching to pong mode.");
-          switch_to_pong_mode(player_one_hit_first);
+        //Serial.println("btn_one_state == 1");
+        //Serial.println(btn_one_last_released);
+        //Serial.println(btn_one_last_pressed);
+        if ((btn_one_last_released >= btn_one_last_pressed) or (!stripe_on)){
+          //Serial.println("btn_one currently is not pressed");
+          if (btn_one_long_state == 0){
+            //Serial.println("btn_one had no long press");
+            player_one_hit_first = false;
+            btn_one_state = 0;
+            if ((btn_one_last_pressed - btn_two_last_pressed) < (pong_btn_delay*1000)){
+              Serial.println("Switching to pong mode.");
+              switch_to_pong_mode(player_one_hit_first);
+            } else {
+              Serial.println("Button one pressed. Toggling led stripe.");
+              toggle_leds(-1);
+            }
+          } else {
+            //Serial.println("btn_one had long press");
+            btn_one_long_state = 0;
+            btn_one_state = 0;
+          }
         } else {
-          Serial.println("Button one pressed. Toggling led stripe.");
-          toggle_leds(-1);
+          //button still pressed. Maybe a long press?
+          if ((millis() - btn_one_last_pressed) > BTN_LONG_PRESS_DELAY){
+            //Serial.println("btn_one long press detected");
+            btn_one_long_state = 1;
+            changeBrightness();
+            publish_current_status();
+            delay(BRIGHTNESS_CHANGE_INTERVAL);
+          } else {
+            //Serial.println("btn_one still pressed");
+            delay(BRIGHTNESS_CHANGE_INTERVAL);
+          }
         }
       }
     } else {
