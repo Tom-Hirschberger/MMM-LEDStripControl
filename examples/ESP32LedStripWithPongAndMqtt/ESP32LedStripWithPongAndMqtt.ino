@@ -401,10 +401,12 @@ void callback(char* topic, byte* message, unsigned int length) {
     Serial.println("Button press via mqtt");
     Serial.println(messageTemp);
     if (messageTemp.toInt() == 2 ){
-      btn_two_last_pressed = millis();;
+      btn_two_last_pressed = millis();
+      btn_two_last_released = btn_two_last_pressed;
       btn_two_state = 1;
     } else {
-      btn_one_last_pressed = millis();;
+      btn_one_last_pressed = millis();
+      btn_one_last_released = btn_one_last_pressed;
       btn_one_state = 1;
     }
   }
