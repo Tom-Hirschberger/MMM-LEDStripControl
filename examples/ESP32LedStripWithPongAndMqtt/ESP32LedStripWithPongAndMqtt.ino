@@ -52,6 +52,7 @@ boolean stripe_on = false;
 float pong_init_delay = PONG_INIT_LED_DELAY;
 float cur_pong_delay = pong_init_delay;
 int num_pong_leds = NUM_PONG_LEDS;
+int pong_start_led = PONG_START_LED;
 int pong_max_wins = PONG_MAX_WINS;
 float pong_wins_delay_during = PONG_RESULT_DELAY_DURING;
 float pong_wins_delay_after = PONG_RESULT_DELAY_AFTER;
@@ -618,7 +619,7 @@ void reset_pong_vars(bool during, bool oneHitFirst){
   }
 
   if (oneHitFirst){
-    cur_pixel = 0;
+    cur_pixel = pong_start_led;
     reverseMode = 0;
   } else {
     cur_pixel = num_pong_leds-1;
@@ -638,7 +639,7 @@ void switch_to_pong_mode(bool oneHitFirst){
   }
   show();
   delay(1000);
-  for (int i = 0; i< num_pong_leds; i++){
+  for (int i = pong_start_led; i< num_pong_leds; i++){
       leds[i].r = pong_color_r;
       leds[i].g = pong_color_g;
       leds[i].b = pong_color_b;
@@ -659,7 +660,7 @@ void display_result(float cur_delay){
       leds[i] = CRGB::Black;
   }
 
-  for (int i = 0; i < player_one_wins; i++){
+  for (int i = pong_start_led; i < player_one_wins+pong_start_led; i++){
     leds[i].r = pong_result_color_r;
     leds[i].g = pong_result_color_g;
     leds[i].b = pong_result_color_b;
@@ -806,12 +807,12 @@ void loop() {
     if (player_successfull_one_press == 0){
       if(btn_one_state == 1){
         btn_one_state = 0;
-        if ((reverseMode == 0) or ((cur_pixel - pong_tolerance) >= 0)){
+        if ((reverseMode == 0) or ((cur_pixel - pong_tolerance) >= pong_start_led)){
           player_one_miss = 1;
         } else {
           player_successfull_one_press = 1;
         }
-      } else if ((reverseMode == 1) && (cur_pixel == 0)){
+      } else if ((reverseMode == 1) && (cur_pixel == pong_start_led)){
         player_one_miss = 1;
       }
     } else {
@@ -836,7 +837,7 @@ void loop() {
           publish_results();
         }
         display_result(pong_wins_delay_during);
-        cur_pixel = 0;
+        cur_pixel = pong_start_led;
         reverseMode = 0;
         if (change_start_led_during_match){
           player_one_hit_first = !player_one_hit_first;
@@ -891,10 +892,10 @@ void loop() {
     if (abortRun == 0){ 
       if (reverseMode == 1){
         cur_pixel -= 1;
-        if (cur_pixel < 0){
+        if (cur_pixel < pong_start_led){
           reverseMode = 0;
           player_successfull_one_press = 0;
-          cur_pixel = 1;
+          cur_pixel = pong_start_led + 1;
           cur_pong_delay = cur_pong_delay - pong_dec_per_run;
           if (cur_pong_delay < pong_min_delay){
             cur_pong_delay = pong_min_delay;
